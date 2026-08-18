@@ -40,7 +40,7 @@ Statický web (čisté HTML/CSS/JS, žádný build krok) připravený k nasazen�
    ```
    (bude potřeba drobná úprava CSS `object-fit: cover` pro `<img>` variantu — dejte vědět, pokud chcete rovnou dosadit.)
 
-2. ~~Odkaz na schůzku~~ — hotovo: `kontakt.html` má napojený skutečný Calendly kalendář (`pavelsramek/osobni-schuzka-60-min`) jako embedovaný widget přímo na stránce (sekce „Vyberte si volný čas“), plus tlačítko v hero sekci na něj odkazuje.
+2. ~~Odkaz na schůzku~~ — hotovo (viz commit „Embed real Calendly widget“): `kontakt.html` má napojený skutečný Calendly kalendář (`pavelsramek/osobni-schuzka-60-min`) jako embedovaný widget přímo na stránce (sekce „Vyberte si volný čas“), plus tlačítko v hero sekci na něj odkazuje.
 
 3. **Odkaz na pirátský program** — v `program.html` je obecný odkaz na pirati.cz. Nahraďte přímým odkazem na krajský/obvodní program, pokud existuje.
 
