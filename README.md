@@ -10,8 +10,9 @@ Statický web (čisté HTML/CSS/JS, žádný build krok) připravený k nasazen�
 ├── o-mne.html             O mě — profesní příběh, FAQ
 ├── program.html           Priority / program — 4 pilíře se stavem plnění
 ├── co-se-povedlo.html      Realizované projekty
+├── investice.html          Investice do Plzně 3 — data a grafy (minulé vs. současné období)
 ├── galerie.html            Foto/video galerie (filtrovatelná)
-├── kontakt.html            Kontaktní formulář + "Připomeň mi volby" + FAQ
+├── kontakt.html            Kontaktní formulář + Calendly rezervace + "Připomeň mi volby" + FAQ
 ├── dekujeme.html           Děkovná stránka po odeslání formuláře
 ├── 404.html                Vlastní stránka "nenalezeno"
 ├── css/style.css           Sdílený design (barvy, typografie, komponenty)
@@ -26,7 +27,13 @@ Statický web (čisté HTML/CSS/JS, žádný build krok) připravený k nasazen�
 - **Kontaktní formulář**, který reálně funguje přes Netlify Forms (`kontakt.html`) — zprávy chodí do Netlify administrace / e-mailem.
 - **Foto/video galerie** (`galerie.html`) s filtrováním podle kategorie (Akce / Projekty / Média) — připravená na doplnění vašich fotek.
 - **Samostatná stránka priorit** (`program.html`) s popisem každého pilíře a stavem plnění (Dokončeno / Probíhá / Připravuje se).
+- **Stránka Investice** (`investice.html`) — srovnání investic za minulé a současné volební období, po letech i po kategoriích, plus zvlášť opravy a údržba MŠ. Grafy jsou čisté HTML/CSS (žádná JS knihovna), s legendou, hover/focus tooltipy na každém sloupci a skrytou tabulkou dat pod „Zobrazit data v tabulce" pro přístupnost. Barvy (fialová/jantarová) jsou validované na barvoslepost a kontrast.
+- **Přebarveno na pirátskou paletu** — přechod fialová → růžová → oranžová → zlatá, do černé (podle vaší kampaňové grafiky), místo původní tmavě modré. Definováno v `css/style.css` v `:root` proměnných (`--purple`, `--pink`, `--orange`, `--accent`).
 - Zachován veškerý původní obsah: bio, profesní historie, 4 body programu, 3 realizované projekty, FAQ, citát, kontakty a sociální sítě.
+
+## Data ve stránce Investice
+
+Čísla v `investice.html` vycházejí z podkladů, které poskytla Petra (přehled investic) a Lada (opravy a údržba MŠ) — interní evidence MO Plzeň 3, stav k 31. 7. 2026. Pokud se podklady aktualizují, hodnoty i výšky sloupců v grafu je potřeba přepočítat ručně (nejde o dynamický graf napojený na zdroj dat).
 
 ## Než nasadíte — co doplnit
 
