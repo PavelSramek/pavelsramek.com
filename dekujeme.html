@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Děkuji — Pavel Šrámek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+Pro:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">PŠ</span>
+      <span class="brand-text">
+        <span class="brand-name">Pavel Šrámek</span>
+        <span class="brand-role">1. místostarosta MO Plzeň 3</span>
+      </span>
+    </a>
+    <nav class="main-nav">
+      <a href="index.html">Zpět na web</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" style="padding-bottom:64px;">
+  <div class="container" style="grid-template-columns:1fr; text-align:center;">
+    <div>
+      <span class="eyebrow">Odesláno</span>
+      <h1>Děkuji za zprávu!</h1>
+      <p class="lede" style="margin:0 auto;">Ozvu se vám co nejdřív. Mezitím se můžete podívat, na čem v Plzni 3 pracuji.</p>
+      <div class="cta-row" style="justify-content:center;">
+        <a href="program.html" class="btn btn-primary">Moje priority</a>
+        <a href="index.html" class="btn btn-ghost">Zpět na hlavní stránku</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>&copy; <span id="year"></span> Pavel Šrámek</span>
+      <span>Zadavatel a zpracovatel: Pavel Šrámek</span>
+    </div>
+  </div>
+</footer>
+
+<script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+</body>
+</html>

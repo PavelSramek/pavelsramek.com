@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kontakt — Pavel Šrámek</title>
+<meta name="description" content="Napište Pavlu Šrámkovi nebo si domluvte schůzku. 1. místostarosta MO Plzeň 3.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+Pro:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">PŠ</span>
+      <span class="brand-text">
+        <span class="brand-name">Pavel Šrámek</span>
+        <span class="brand-role">1. místostarosta MO Plzeň 3</span>
+      </span>
+    </a>
+    <button class="nav-toggle" aria-label="Otevřít menu"></button>
+    <nav class="main-nav">
+      <a href="o-mne.html">O mě</a>
+      <a href="program.html">Priority</a>
+      <a href="co-se-povedlo.html">Co se povedlo</a>
+      <a href="galerie.html">Galerie</a>
+      <a href="kontakt.html" class="nav-cta" aria-current="page">Potkejme se</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" style="padding-bottom:64px;">
+  <div class="container" style="grid-template-columns:1fr;">
+    <div>
+      <span class="eyebrow">Čas pro Vás</span>
+      <h1>Potkejme se</h1>
+      <p class="lede">Klikněte na odkaz, najděte volný termín a můžeme se potkat nebo si zavolat. Nebo mi rovnou napište níže.</p>
+      <div class="cta-row">
+        <a href="https://calendly.com/piratsramek" target="_blank" rel="noopener" class="btn btn-primary">Najít volný termín</a>
+        <a href="mailto:pavel.sramek@pirati.cz" class="btn btn-ghost">pavel.sramek@pirati.cz</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="grid grid-2" style="align-items:flex-start; gap:40px;">
+
+      <div>
+        <div class="section-head">
+          <span class="kicker">Napište mi</span>
+          <h2>Ať zůstaneme v kontaktu</h2>
+        </div>
+
+        <div id="form-confirm" class="confirm-box">Díky za zprávu! Ozvu se vám co nejdřív.</div>
+
+        <div class="form-card">
+          <form id="contact-form" name="kontakt" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/dekujeme.html">
+            <input type="hidden" name="form-name" value="kontakt">
+            <p class="honeypot">
+              <label>Nevyplňujte toto pole: <input name="bot-field"></label>
+            </p>
+
+            <div class="form-row">
+              <label for="jmeno">Jméno a příjmení</label>
+              <input type="text" id="jmeno" name="jmeno" required>
+            </div>
+
+            <div class="form-row">
+              <label for="email">E-mail</label>
+              <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="form-row">
+              <label for="tema">Téma</label>
+              <select id="tema" name="tema">
+                <option>Podnět z mého okolí</option>
+                <option>Bydlení a výstavba</option>
+                <option>Zdravotnictví</option>
+                <option>Životní prostředí</option>
+                <option>Digitalizace úřadu</option>
+                <option>Spolupráce / média</option>
+                <option>Jiné</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <label for="zprava">Zpráva</label>
+              <textarea id="zprava" name="zprava" required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Odeslat zprávu</button>
+            <p class="form-note">Formulář zpracovává Netlify Forms. Odesláním zprávy souhlasíte se zpracováním uvedených údajů za účelem odpovědi.</p>
+          </form>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-head">
+          <span class="kicker">Připomeň mi, kdy jsou volby!</span>
+          <h2>Nenechte si ujít termín voleb</h2>
+        </div>
+        <div class="form-card" style="margin-bottom:32px;">
+          <p>Zanechte e-mail a ozvu se vám včas před volbami, ať víte, kdy a jak volit.</p>
+          <form name="pripomenutí-voleb" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/dekujeme.html">
+            <input type="hidden" name="form-name" value="pripomenutí-voleb">
+            <p class="honeypot">
+              <label>Nevyplňujte toto pole: <input name="bot-field"></label>
+            </p>
+            <div class="form-row">
+              <label for="volby-email">E-mail</label>
+              <input type="email" id="volby-email" name="email" required>
+            </div>
+            <button type="submit" class="btn btn-outline">Připomenout mi volby</button>
+          </form>
+        </div>
+
+        <div class="section-head">
+          <span class="kicker">Sledujte mě</span>
+          <h2>Sociální sítě</h2>
+        </div>
+        <div class="social-row">
+          <a href="https://www.facebook.com/piratsramek" target="_blank" rel="noopener">FB</a>
+          <a href="https://x.com/piratsramek" target="_blank" rel="noopener">X</a>
+          <a href="https://www.instagram.com/piratsramek" target="_blank" rel="noopener">IG</a>
+          <a href="https://www.tiktok.com/@piratsramek" target="_blank" rel="noopener">TT</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="section-soft">
+  <div class="container">
+    <div class="section-head">
+      <span class="kicker">Časté otázky</span>
+      <h2>Než napíšete</h2>
+    </div>
+    <details class="faq-item" open>
+      <summary>Jak rychle odpovídáte?</summary>
+      <p>Zprávy z formuláře čtu průběžně a snažím se odpovědět do několika pracovních dnů. U naléhavých podnětů z obvodu preferujte telefon nebo osobní schůzku.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Můžu přijít i bez objednání?</summary>
+      <p>Pro jistotu, že si na vás udělám čas, doporučuji domluvit termín přes odkaz výše. Konzultační hodiny jsou vypsané i na úřední desce MO Plzeň 3.</p>
+    </details>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <h4>Pavel Šrámek</h4>
+        <p style="color:#b9c3cf;">1. místostarosta Městského obvodu Plzeň 3. Usiluji o lepší život pro mladé lidi a rodiny.</p>
+        <div class="social-row">
+          <a href="https://www.facebook.com/piratsramek" target="_blank" rel="noopener">FB</a>
+          <a href="https://x.com/piratsramek" target="_blank" rel="noopener">X</a>
+          <a href="https://www.instagram.com/piratsramek" target="_blank" rel="noopener">IG</a>
+          <a href="https://www.tiktok.com/@piratsramek" target="_blank" rel="noopener">TT</a>
+        </div>
+      </div>
+      <div>
+        <h4>Navigace</h4>
+        <ul>
+          <li><a href="o-mne.html">O mě</a></li>
+          <li><a href="program.html">Priority</a></li>
+          <li><a href="co-se-povedlo.html">Co se povedlo</a></li>
+          <li><a href="galerie.html">Galerie</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Kontakt</h4>
+        <ul>
+          <li><a href="mailto:pavel.sramek@pirati.cz">pavel.sramek@pirati.cz</a></li>
+          <li><a href="kontakt.html">Domluvit schůzku</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; <span id="year"></span> Pavel Šrámek</span>
+      <span>Zadavatel a zpracovatel: Pavel Šrámek</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+</body>
+</html>
