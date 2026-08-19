@@ -37,15 +37,7 @@ Statický web (čisté HTML/CSS/JS, žádný build krok) připravený k nasazen�
 
 ## Než nasadíte — co doplnit
 
-1. **Fotky** — nahraďte zástupné rámečky (v `index.html`, `o-mne.html`, `co-se-povedlo.html`, `galerie.html`) skutečnými obrázky. Uložte je do `img/` a nahraďte např.:
-   ```html
-   <div class="hero-portrait">Portrétní fotografie...</div>
-   ```
-   za
-   ```html
-   <img class="hero-portrait" src="img/portret.jpg" alt="Pavel Šrámek">
-   ```
-   (bude potřeba drobná úprava CSS `object-fit: cover` pro `<img>` variantu — dejte vědět, pokud chcete rovnou dosadit.)
+1. ~~Fotky~~ — portrétní fotka na hlavní stránce je hotová (`img/pavel-portret.jpg`). Zbývá doplnit: hasičárna Skvrňany a radar Radobyčice v `co-se-povedlo.html` (zatím textové zástupné rámečky) a doladit `galerie.html`.
 
 2. ~~Odkaz na schůzku~~ — hotovo (viz commit „Embed real Calendly widget“): `kontakt.html` má napojený skutečný Calendly kalendář (`pavelsramek/osobni-schuzka-60-min`) jako embedovaný widget přímo na stránce (sekce „Vyberte si volný čas“), plus tlačítko v hero sekci na něj odkazuje.
 
