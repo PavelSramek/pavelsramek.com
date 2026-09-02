@@ -848,6 +848,41 @@ section { padding: 72px 0; }
 }
 .legal-facts dd { margin: 0; color: var(--ink); }
 
+.flyer-preview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 16px 0;
+}
+.flyer-preview a {
+  display: block;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+.flyer-preview img { display: block; width: 100%; height: auto; }
+@media (max-width: 560px) {
+  .flyer-preview { grid-template-columns: 1fr; }
+}
+
+/* ---------- Medailonek ---------- */
+.medallion-card {
+  background: var(--paper-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 32px;
+}
+.medallion-card p:last-child { margin-bottom: 0; }
+.medallion-quote {
+  margin: 18px 0 0;
+  padding-left: 16px;
+  border-left: 3px solid var(--accent);
+  font-family: "Source Serif Pro", serif;
+  font-style: italic;
+  color: var(--navy);
+}
+
 
 /* ---------- Utility ---------- */
 .text-center { text-align: center; }
