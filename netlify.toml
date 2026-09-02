@@ -10,3 +10,13 @@
 
 # 404.html is served automatically by Netlify for unmatched routes —
 # no redirect rule needed.
+
+# Explicit clean-URL redirect for the QR-code transparency page — printed
+# materials point to pavelsramek.com/transparence (no .html), so this rule
+# is kept even though Netlify's default clean-URL handling would likely
+# already serve it, since printed QR codes cannot be reissued if that
+# assumption ever turns out wrong.
+[[redirects]]
+  from = "/transparence"
+  to = "/transparence.html"
+  status = 200

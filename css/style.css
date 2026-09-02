@@ -781,6 +781,23 @@ section { padding: 72px 0; }
   flex-wrap: wrap;
   gap: 10px;
 }
+.footer-bottom a { color: inherit; }
+
+/* ---------- Legal / transparency notice ---------- */
+.legal-facts { display: flex; flex-direction: column; }
+.legal-facts > div { padding: 18px 0; border-bottom: 1px solid var(--line); }
+.legal-facts > div:last-child { border-bottom: none; padding-bottom: 0; }
+.legal-facts > div:first-child { padding-top: 0; }
+.legal-facts dt {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.legal-facts dd { margin: 0; color: var(--ink); }
+
 
 /* ---------- Utility ---------- */
 .text-center { text-align: center; }
