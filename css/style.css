@@ -366,56 +366,6 @@ section { padding: 72px 0; }
 }
 .quote-block cite { color: var(--accent); font-style: normal; font-weight: 600; }
 
-/* ---------- Tým / kandidáti ---------- */
-.team-photo-banner {
-  width: 100%;
-  display: block;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  margin-bottom: 8px;
-  object-fit: cover;
-  max-height: 420px;
-}
-.team-card { text-align: left; }
-.team-avatar {
-  width: 104px;
-  height: 104px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid var(--accent);
-  box-shadow: var(--shadow);
-  margin-bottom: 16px;
-}
-.team-role { color: var(--muted); font-size: 0.92rem; margin: 2px 0 10px; }
-.ballot-numbers { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 14px; }
-.ballot-tag {
-  background: var(--paper-soft);
-  border: 1px solid var(--line);
-  color: var(--navy);
-  font-weight: 700;
-  font-size: 0.76rem;
-  padding: 4px 11px;
-  border-radius: 999px;
-  white-space: nowrap;
-}
-.team-card blockquote {
-  margin: 14px 0 0;
-  padding-left: 14px;
-  border-left: 3px solid var(--accent);
-  font-family: "Source Serif Pro", serif;
-  font-style: italic;
-  color: var(--navy);
-}
-.ballot-info {
-  background: var(--paper-soft);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 24px 28px;
-  text-align: center;
-}
-.ballot-info .ballot-numbers { justify-content: center; margin: 10px 0 0; }
-.ballot-info .ballot-tag { font-size: 0.95rem; padding: 8px 18px; }
-
 /* ---------- Status badges ---------- */
 .status {
   display: inline-flex;
@@ -831,6 +781,73 @@ section { padding: 72px 0; }
   flex-wrap: wrap;
   gap: 10px;
 }
+.footer-bottom a { color: inherit; }
+
+/* ---------- Tým / kandidáti ---------- */
+.team-photo-banner {
+  width: 100%;
+  display: block;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 8px;
+  object-fit: cover;
+  max-height: 420px;
+}
+.team-card { text-align: left; }
+.team-avatar {
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--accent);
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+.team-role { color: var(--muted); font-size: 0.92rem; margin: 2px 0 10px; }
+.ballot-numbers { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 14px; }
+.ballot-tag {
+  background: var(--paper-soft);
+  border: 1px solid var(--line);
+  color: var(--navy);
+  font-weight: 700;
+  font-size: 0.76rem;
+  padding: 4px 11px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.team-card blockquote {
+  margin: 14px 0 0;
+  padding-left: 14px;
+  border-left: 3px solid var(--accent);
+  font-family: "Source Serif Pro", serif;
+  font-style: italic;
+  color: var(--navy);
+}
+.ballot-info {
+  background: var(--paper-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  text-align: center;
+}
+.ballot-info .ballot-numbers { justify-content: center; margin: 10px 0 0; }
+.ballot-info .ballot-tag { font-size: 0.95rem; padding: 8px 18px; }
+
+/* ---------- Legal / transparency notice ---------- */
+.legal-facts { display: flex; flex-direction: column; }
+.legal-facts > div { padding: 18px 0; border-bottom: 1px solid var(--line); }
+.legal-facts > div:last-child { border-bottom: none; padding-bottom: 0; }
+.legal-facts > div:first-child { padding-top: 0; }
+.legal-facts dt {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.legal-facts dd { margin: 0; color: var(--ink); }
+
 
 /* ---------- Utility ---------- */
 .text-center { text-align: center; }
