@@ -791,7 +791,7 @@ section { padding: 72px 0; }
   box-shadow: var(--shadow);
   margin-bottom: 8px;
   object-fit: cover;
-  max-height: 420px;
+  max-height: 840px;
 }
 .team-card { text-align: left; }
 .team-avatar {
