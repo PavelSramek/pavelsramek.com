@@ -912,14 +912,38 @@ section { padding: 72px 0; }
 .footer-bottom a { color: inherit; }
 
 /* ---------- Tým / kandidáti ---------- */
-.team-photo-banner {
-  width: 100%;
-  display: block;
-  border-radius: var(--radius);
+.team-photo-duo {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+.team-photo-duo-frame {
+  flex: 1 1 0;
+  padding: 5px;
   box-shadow: var(--shadow);
-  margin-bottom: 8px;
+}
+.team-photo-duo-frame.is-playful {
+  background: linear-gradient(150deg, var(--purple), var(--pink), var(--orange));
+}
+.team-photo-duo-frame.is-formal {
+  background: linear-gradient(150deg, var(--orange), var(--pink), var(--purple));
+}
+.team-photo-duo-frame img {
+  width: 100%;
+  height: 340px;
+  display: block;
   object-fit: cover;
-  max-height: 840px;
+  object-position: center 30%;
+}
+.team-photo-duo-caption {
+  text-align: center;
+  font-weight: 800;
+  color: var(--navy);
+  margin: 0 0 8px;
+}
+@media (max-width: 640px) {
+  .team-photo-duo { flex-direction: column; }
+  .team-photo-duo-frame img { height: 260px; }
 }
 .team-card { text-align: left; }
 .team-avatar {
