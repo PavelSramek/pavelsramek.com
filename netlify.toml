@@ -20,3 +20,11 @@
   from = "/transparence"
   to = "/transparence.html"
   status = 200
+
+# Explicit clean-URL redirect for the QR-code "follow me" page — the
+# printed leaflet's QR code points to pavelsramek.com/follow (no .html),
+# same reasoning as /transparence above.
+[[redirects]]
+  from = "/follow"
+  to = "/follow.html"
+  status = 200

@@ -598,6 +598,134 @@ section { padding: 72px 0; }
 }
 .ig-embed iframe { border-radius: 12px !important; }
 
+/* ---------- Social feeds (Facebook / Instagram) ---------- */
+.social-feed-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  align-items: stretch;
+}
+.social-feed-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+}
+.social-feed-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.social-feed-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+.social-feed-icon.fb { background: #1877f2; }
+.social-feed-icon.ig { background: radial-gradient(circle at 30% 110%, #ffdb8b 0%, #ee2a7b 45%, #6228d7 90%); }
+.social-feed-card > p { margin-bottom: 16px; }
+.social-feed-frame {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  flex: 1;
+  min-height: 500px;
+  display: flex;
+}
+.social-feed-frame iframe { width: 100%; border: none; }
+.social-feed-placeholder {
+  flex: 1;
+  min-height: 500px;
+  border-radius: 12px;
+  border: 1px dashed var(--line);
+  background: var(--paper-soft);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px 24px;
+  gap: 14px;
+}
+.social-feed-placeholder .ig-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 110%, #ffdb8b 0%, #ee2a7b 45%, #6228d7 90%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-family: "Source Serif Pro", serif;
+  font-size: 1.3rem;
+}
+.social-feed-placeholder p { margin-bottom: 0; color: var(--muted); max-width: 32ch; }
+@media (max-width: 760px) {
+  .social-feed-grid { grid-template-columns: 1fr; }
+}
+
+/* ---------- Aktuality (press archive) ---------- */
+.aktuality-year-block { margin-bottom: 48px; }
+.aktuality-year-block:last-child { margin-bottom: 0; }
+.aktuality-year-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--line);
+}
+.aktuality-year-heading h2 { margin: 0; }
+.aktuality-year-heading .count { color: var(--muted); font-size: 0.95rem; }
+.aktuality-list { display: grid; gap: 16px; }
+.aktuality-item {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  box-shadow: var(--shadow);
+}
+.aktuality-item .aktuality-date {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+.aktuality-item h3 { margin-bottom: 8px; font-size: 1.15rem; }
+.aktuality-item p { color: var(--muted); margin-bottom: 10px; }
+.aktuality-item a.source-link {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--navy);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent);
+}
+.aktuality-item a.source-link:hover { color: var(--accent-dark); }
+.aktuality-note {
+  background: var(--paper-soft);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  color: var(--muted);
+  font-size: 0.92rem;
+  margin-bottom: 40px;
+}
+.aktuality-note strong { color: var(--ink); }
+
 /* ---------- Gallery ---------- */
 .gallery-grid {
   display: grid;
@@ -897,6 +1025,99 @@ section { padding: 72px 0; }
   padding: 6px 12px;
   border-radius: 999px;
 }
+
+/* ---------- Linkbio (QR / "Sledujte mě" — pavelsramek.com/follow) ---------- */
+.linkbio-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 16px;
+  background:
+    linear-gradient(to top, var(--navy-dark) 0%, transparent 42%),
+    linear-gradient(120deg, transparent 48%, var(--purple) 60%, var(--pink) 74%, var(--orange) 88%, var(--accent) 100%),
+    linear-gradient(165deg, var(--navy) 0%, var(--navy-dark) 100%);
+}
+.linkbio-card {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 24px;
+  padding: 32px 24px 28px;
+  text-align: center;
+  box-shadow: 0 24px 60px -20px rgba(0,0,0,0.45);
+}
+.linkbio-avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 14px;
+  display: block;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 3px var(--accent);
+}
+.linkbio-card h1 {
+  font-size: 1.4rem;
+  margin-bottom: 2px;
+}
+.linkbio-role {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.92rem;
+  margin-bottom: 14px;
+}
+.linkbio-tagline {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin: 0 0 22px;
+}
+.linkbio-links {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.linkbio-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--paper-soft);
+  text-decoration: none;
+  color: var(--ink);
+  text-align: left;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.linkbio-btn:hover, .linkbio-btn:active {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+  border-color: transparent;
+}
+.linkbio-btn .social-feed-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  font-size: 1rem;
+}
+.linkbio-btn .social-feed-icon.x { background: #000; }
+.linkbio-btn .social-feed-icon.tt { background: #000; }
+.linkbio-btn-label { flex: 1; min-width: 0; }
+.linkbio-btn-label strong { display: block; font-size: 1rem; }
+.linkbio-btn-label span { display: block; color: var(--muted); font-size: 0.85rem; }
+.linkbio-btn-arrow { color: var(--muted); font-size: 1.1rem; flex-shrink: 0; transition: transform 0.15s ease; }
+.linkbio-btn:hover .linkbio-btn-arrow { transform: translateX(3px); color: var(--ink); }
+.linkbio-back {
+  display: inline-block;
+  color: var(--muted);
+  font-size: 0.88rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.linkbio-back:hover { color: var(--ink); }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 860px) {
