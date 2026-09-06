@@ -28,3 +28,15 @@
   from = "/follow"
   to = "/follow.html"
   status = 200
+
+# /galerie byla zrušena (duplikovala co-se-povedlo.html) — přesměrování
+# pro staré odkazy/záložky/indexaci na nejbližší náhradu.
+[[redirects]]
+  from = "/galerie"
+  to = "/co-se-povedlo.html"
+  status = 301
+
+[[redirects]]
+  from = "/galerie.html"
+  to = "/co-se-povedlo.html"
+  status = 301
