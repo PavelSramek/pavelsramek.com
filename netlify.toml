@@ -40,3 +40,15 @@
   from = "/galerie.html"
   to = "/co-se-povedlo.html"
   status = 301
+
+# /aktuality byla zrušena (obsah je teď identický s co-se-povedlo.html)
+# — přesměrování pro staré odkazy/záložky/indexaci.
+[[redirects]]
+  from = "/aktuality"
+  to = "/co-se-povedlo.html"
+  status = 301
+
+[[redirects]]
+  from = "/aktuality.html"
+  to = "/co-se-povedlo.html"
+  status = 301
