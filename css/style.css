@@ -644,34 +644,6 @@ section { padding: 72px 0; }
   display: flex;
 }
 .social-feed-frame iframe { width: 100%; border: none; }
-.social-feed-placeholder {
-  flex: 1;
-  min-height: 500px;
-  border-radius: 12px;
-  border: 1px dashed var(--line);
-  background: var(--paper-soft);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 32px 24px;
-  gap: 14px;
-}
-.social-feed-placeholder .ig-avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 110%, #ffdb8b 0%, #ee2a7b 45%, #6228d7 90%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-weight: 700;
-  font-family: "Source Serif Pro", serif;
-  font-size: 1.3rem;
-}
-.social-feed-placeholder p { margin-bottom: 0; color: var(--muted); max-width: 32ch; }
 @media (max-width: 760px) {
   .social-feed-grid { grid-template-columns: 1fr; }
 }
