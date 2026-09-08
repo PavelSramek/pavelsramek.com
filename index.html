@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+Pro:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/hero-story.css">
 </head>
 <body>
 
@@ -34,20 +35,88 @@
   </div>
 </header>
 
-<section class="hero">
-  <div class="container">
-    <div>
-      <span class="eyebrow">1. místostarosta &middot; Plzeň 3</span>
-      <h1>Usiluji o lepší život pro mladé lidi a rodiny.</h1>
-      <p class="lede">Mgr. Pavel Šrámek — uvolněný 1. místostarosta Městského obvodu Plzeň 3 od roku 2022, právník, bývalý manažer v IT a bývalý voják. Pracuji na bydlení pro mladé, zeleni, klidnějším dopravě a moderním úřadu.</p>
-      <div class="cta-row">
-        <a href="kontakt.html" class="btn btn-primary">Domluvit schůzku</a>
-        <a href="program.html" class="btn btn-ghost">Moje priority</a>
-      </div>
+<div class="hs-root">
+<div class="hs-scroll-progress" id="hsScrollProgress"></div>
+
+<section class="hs-stage">
+  <div class="hs-stage-copy">
+    <span class="hs-eyebrow">1. místostarosta &middot; Plzeň 3</span>
+    <h1>Jeden člověk.<br>Pár různých životů.</h1>
+    <p>Scrollujte a projděte si, odkud přicházím &mdash; než se dostanu k tomu, co dělám dnes.</p>
+    <div class="hs-cta-row">
+      <a href="kontakt.html" class="hs-btn hs-btn-primary">Domluvit schůzku</a>
+      <a href="program.html" class="hs-btn hs-btn-ghost">Moje priority</a>
     </div>
-    <img class="hero-portrait" src="img/pavel-portret.jpg" alt="Pavel Šrámek, 1. místostarosta MO Plzeň 3">
+  </div>
+  <div class="hs-portrait-stage-wrap" id="hsTiltWrap">
+    <div class="hs-portrait-glow"></div>
+    <div class="hs-portrait-frame" id="hsTiltFrame">
+      <img src="img/pavel-portret.jpg" alt="Pavel Šrámek, 1. místostarosta MO Plzeň 3">
+    </div>
+  </div>
+  <div class="hs-scroll-cue">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 6l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Scrollujte dolů
   </div>
 </section>
+
+<section class="hs-chapters">
+  <div class="hs-chapters-grid">
+    <div class="hs-portrait-pin">
+      <div class="hs-pin-glow"></div>
+      <div class="hs-pin-frame">
+        <div class="hs-pin-flip" id="hsPinFlip">
+          <div class="hs-pin-face hs-pin-face-front hs-pin-placeholder" id="hsPinFaceFront">
+            <span class="hs-ph-label">Právník</span>
+            <span class="hs-ph-note">zatím bez fotky</span>
+          </div>
+          <div class="hs-pin-face hs-pin-face-back hs-pin-placeholder" id="hsPinFaceBack">
+            <span class="hs-ph-label">Bývalý voják</span>
+            <span class="hs-ph-note">zatím bez fotky</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hs-phrase-col">
+      <div class="hs-phrase-panel" data-index="01">
+        <span class="hs-phrase-index">01</span>
+        <div class="hs-phrase-wrap">
+          <p class="hs-phrase-text hs-phrase-base">Právník.</p>
+          <p class="hs-phrase-text hs-phrase-glow" aria-hidden="true">Právník.</p>
+        </div>
+      </div>
+      <div class="hs-phrase-panel" data-index="02">
+        <span class="hs-phrase-index">02</span>
+        <div class="hs-phrase-wrap">
+          <p class="hs-phrase-text hs-phrase-base">Bývalý voják.</p>
+          <p class="hs-phrase-text hs-phrase-glow" aria-hidden="true">Bývalý voják.</p>
+        </div>
+      </div>
+      <div class="hs-phrase-panel" data-index="03">
+        <span class="hs-phrase-index">03</span>
+        <div class="hs-phrase-wrap">
+          <p class="hs-phrase-text hs-phrase-base">Manažer v IT.</p>
+          <p class="hs-phrase-text hs-phrase-glow" aria-hidden="true">Manažer v IT.</p>
+        </div>
+      </div>
+      <div class="hs-phrase-panel" data-index="04">
+        <span class="hs-phrase-index">04</span>
+        <div class="hs-phrase-wrap">
+          <p class="hs-phrase-text hs-phrase-base">Táta dvou kluků.</p>
+          <p class="hs-phrase-text hs-phrase-glow" aria-hidden="true">Táta dvou kluků.</p>
+        </div>
+      </div>
+      <div class="hs-phrase-panel" data-index="05">
+        <span class="hs-phrase-index">05</span>
+        <div class="hs-phrase-wrap">
+          <p class="hs-phrase-text hs-phrase-base">1. místostarosta Plzně 3.</p>
+          <p class="hs-phrase-text hs-phrase-glow" aria-hidden="true">1. místostarosta Plzně 3.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
 
 <section class="section-soft">
   <div class="container">
@@ -209,6 +278,7 @@
   </div>
 </footer>
 
+<script src="js/hero-story.js"></script>
 <script src="js/main.js"></script>
 <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
 </body>
