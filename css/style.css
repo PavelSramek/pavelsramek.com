@@ -118,16 +118,17 @@ img { max-width: 100%; display: block; }
 .main-nav {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
 }
 
 .main-nav a {
   text-decoration: none;
   color: var(--ink);
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 500;
-  padding: 10px 14px;
+  padding: 9px 10px;
   border-radius: 8px;
+  white-space: nowrap;
   transition: background 0.15s, color 0.15s;
 }
 
@@ -1072,7 +1073,9 @@ section { padding: 72px 0; }
   .footer-grid { grid-template-columns: 1fr; }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 1140px) {
+  /* the nav grew an 8th item (Laboratoř), so it now needs more room than
+     it used to before it switches to the hamburger menu */
   .main-nav { display: none; }
   .nav-toggle { display: block; }
   body.nav-open .main-nav {
@@ -1087,6 +1090,9 @@ section { padding: 72px 0; }
     padding: 12px;
     box-shadow: var(--shadow);
   }
+}
+
+@media (max-width: 640px) {
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
   section { padding: 52px 0; }
   .contact-strip { flex-direction: column; align-items: flex-start; }
