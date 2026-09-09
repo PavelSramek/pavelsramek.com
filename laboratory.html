@@ -2,36 +2,72 @@
 <html lang="cs">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="robots" content="noindex">
 <title>Laboratoř — Pavel Šrámek</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+Pro:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/crystal.css">
+<link rel="stylesheet" href="css/curve.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 
 <a href="index.html" id="backlink">&larr; pavelsramek.com</a>
-<div id="stage"></div>
-<div id="vignette"></div>
-<div id="hint">Chyť <b>krystal</b> a roztoč ho</div>
-<div id="hud">
-  <div class="title">Živá fyzika</div>
-  <div class="row"><span>rychlost</span><span id="hudSpeed">0.00</span></div>
-  <div class="row"><span>rotace / s</span><span id="hudSpin">0.00</span></div>
-  <div class="row"><span>odrazy (teď)</span><span id="hudBounces">0</span></div>
+<button id="gameSwitch" class="game-switch">🌀 Zatáčka</button>
+
+<div id="crystalRoot">
+  <div id="stage"></div>
+  <div id="vignette"></div>
+  <div id="hint">Chyť <b>krystal</b> a roztoč ho</div>
+  <div id="hud">
+    <div class="title">Živá fyzika</div>
+    <div class="row"><span>rychlost</span><span id="hudSpeed">0.00</span></div>
+    <div class="row"><span>rotace / s</span><span id="hudSpin">0.00</span></div>
+    <div class="row"><span>odrazy (teď)</span><span id="hudBounces">0</span></div>
+  </div>
+  <div id="score">
+    <div class="title">Skóre</div>
+    <div class="value" id="scoreValue">0</div>
+    <div class="best">nejlepší: <span id="scoreBest">0</span></div>
+    <div class="badges" id="scoreBadges"></div>
+  </div>
+  <div id="toast"></div>
+  <button id="tiltBtn" class="is-hidden">Povolit náklon telefonu</button>
 </div>
-<div id="score">
-  <div class="title">Skóre</div>
-  <div class="value" id="scoreValue">0</div>
-  <div class="best">nejlepší: <span id="scoreBest">0</span></div>
-  <div class="badges" id="scoreBadges"></div>
+
+<div id="curveRoot" class="game-hidden">
+  <canvas id="trail"></canvas>
+  <canvas id="heads"></canvas>
+  <div id="scoreboard">
+    <span class="p1score" id="scoreP1">0</span>
+    <span class="sep">:</span>
+    <span class="p2score" id="scoreP2">0</span>
+    <span class="round">kolo <span id="roundNum">1</span></span>
+  </div>
+  <div class="ctrl-cluster p1">
+    <button class="ctrl-btn left">&#9664;</button>
+    <button class="ctrl-btn right">&#9654;</button>
+  </div>
+  <div class="ctrl-cluster p2">
+    <button class="ctrl-btn left">&#9664;</button>
+    <button class="ctrl-btn right">&#9654;</button>
+  </div>
+  <div id="startHint">
+    <h1>Zatáčka</h1>
+    <p>Dva hráči, jeden telefon. Polož ho mezi vás na stůl: každý ovládá svoje šipky ze svojí strany.</p>
+    <div class="tap">Klepni a hraj</div>
+  </div>
+  <div id="banner">
+    <div class="title"></div>
+    <div class="sub"></div>
+  </div>
 </div>
-<div id="toast"></div>
-<button id="tiltBtn" class="is-hidden">Povolit náklon telefonu</button>
+
 <div id="corner">vlastní 3D scéna &middot; <b>WebGL</b></div>
 
 <script src="js/crystal.js"></script>
+<script src="js/curve.js"></script>
+<script src="js/game-switch.js"></script>
 </body>
 </html>

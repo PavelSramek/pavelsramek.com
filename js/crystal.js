@@ -332,12 +332,21 @@
   }
 
   // ---------- main loop ----------
+  // "active" lets a host page pause this game (e.g. while the visitor has
+  // switched to the other showcase piece) without tearing anything down —
+  // state, score and the Three.js scene all just sit still until resumed.
+  var active = true;
   var last = performance.now();
 
   function tick(){
     var now = performance.now();
     var dt = Math.min((now - last) / 1000, 1 / 30);
     last = now;
+
+    if(!active){
+      requestAnimationFrame(tick);
+      return;
+    }
 
     if(!dragging){
       if(tiltEnabled){
@@ -431,4 +440,8 @@
   }
 
   requestAnimationFrame(tick);
+
+  window.PSCrystal = {
+    setActive: function(v){ active = !!v; }
+  };
 })();
