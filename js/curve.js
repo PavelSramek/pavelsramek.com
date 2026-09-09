@@ -224,8 +224,13 @@
   }
   document.querySelectorAll('.ctrl-cluster.p1 .left').forEach(function(el){ bindButton(el, 'p1', 'left'); });
   document.querySelectorAll('.ctrl-cluster.p1 .right').forEach(function(el){ bindButton(el, 'p1', 'right'); });
-  document.querySelectorAll('.ctrl-cluster.p2 .left').forEach(function(el){ bindButton(el, 'p2', 'left'); });
-  document.querySelectorAll('.ctrl-cluster.p2 .right').forEach(function(el){ bindButton(el, 'p2', 'right'); });
+  // P2's whole cluster is CSS-rotated 180° so it reads right-side-up from
+  // across the table — but that rotation also flips each button's glyph
+  // (the ◀ visually becomes a ▶ once spun around). Bind by what the arrow
+  // ends up POINTING AT after rotation, not by its unrotated class name,
+  // otherwise the arrow you see and the turn you get don't match.
+  document.querySelectorAll('.ctrl-cluster.p2 .left').forEach(function(el){ bindButton(el, 'p2', 'right'); });
+  document.querySelectorAll('.ctrl-cluster.p2 .right').forEach(function(el){ bindButton(el, 'p2', 'left'); });
 
   // desktop convenience for testing — harmless on phones
   window.addEventListener('keydown', function(e){
