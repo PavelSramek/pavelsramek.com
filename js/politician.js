@@ -7,7 +7,9 @@
   var scoreBestEl = document.getElementById('pzScoreBest');
   var rankEl = document.getElementById('pzRank');
   var milestoneEl = document.getElementById('pzMilestone');
+  var milestoneKickerEl = document.getElementById('pzMilestoneKicker');
   var milestoneNameEl = document.getElementById('pzMilestoneName');
+  var milestonePartyEl = document.getElementById('pzMilestoneParty');
   var milestoneQuipEl = document.getElementById('pzMilestoneQuip');
   var startCard = document.getElementById('pzStartCard');
   var startTap = document.getElementById('pzStartTap');
@@ -28,16 +30,65 @@
     { emoji: '✂️', label: 'Slavnostní otevření' }
   ];
 
-  // score milestones — index 0 is the starting rank (never announced with a
-  // banner, just shown as the baseline under the score box); the rest fire
-  // a milestone banner the moment the player's score first crosses them.
+  // 50 levels = 50 skutečných čelních kandidátů stran do zastupitelstva města
+  // Plzně (voby 2026). Pořadí kopíruje kandidátky strana po straně, jen Roman
+  // Zarzycký (ANO, primátor) je vyjmutý ze své ANO řady a posazený jako
+  // úplně poslední, 50. level — boss level, po jehož dosažení je tempo hry
+  // už tak vysoké, že ho reálně nelze "vyhrát", jen se k němu dostat.
+  // index 0 (Pavel Šrámek, score 0) je startovní úroveň — nikdy se pro ni
+  // nezobrazuje banner, je to jen výchozí stav pod skóre boxem.
   var RANKS = [
-    { score: 0,    name: 'Nováček na kandidátce' },
-    { score: 100,  name: 'Radek Proch',      quip: 'Sportovní tempo. Rychlost roste.' },
-    { score: 300,  name: 'Kateřina Hulínská', quip: 'Přehled o všem, co se ve městě řeší.' },
-    { score: 600,  name: 'Marek Habruň',      quip: 'Naplánováno do posledního detailu.' },
-    { score: 1000, name: 'Pavel Šrámek',      quip: 'Level lídra kandidátky. Skoro doma.' },
-    { score: 1500, name: 'Roman Zarzycký', boss: true, quip: '🎥 Teď musíš natočit aspoň 3 videa denně. O všem.' }
+    { score: 0,     name: 'Pavel Šrámek',        party: 'Piráti' },
+    { score: 60,    name: 'Pavel Bosák',          party: 'Piráti', quip: 'Náměstek primátora. Tempo se pomalu rozjíždí.' },
+    { score: 180,   name: 'Daniel Kůs',           party: 'Piráti', quip: 'Radní města Plzně. Agenda přibývá.' },
+    { score: 360,   name: 'Jiří Rezek',           party: 'Piráti', quip: 'Místostarosta Plzně 1. Vědecký přístup ke všemu.' },
+    { score: 600,   name: 'Marek Habruň',         party: 'Piráti', quip: 'Stavební projektant. Naplánováno do posledního detailu.' },
+    { score: 900,   name: 'Tomáš Zalabák',        party: 'Piráti', quip: 'Kandidát na starostu Plzně 2 - Slovany. Tempo houstne.' },
+    { score: 1260,  name: 'Martin Holzman',       party: 'Piráti', quip: 'Radní Plzně 1. Studuje i mezi kliknutími.' },
+    { score: 1680,  name: 'Martin Kubin',         party: 'Piráti', quip: 'Kontrolní výbor Plzně 4. Logistika musí sedět.' },
+    { score: 2160,  name: 'Jana Tomšíková',       party: 'Piráti', quip: 'Učitelka. Žádné dítě jí neuteče, žádná ikonka taky ne.' },
+    { score: 2700,  name: 'Radek Krejčí',         party: 'Piráti', quip: 'Moderátor kvízů. Na všechno má odpověď, i na tuhle hru.' },
+    { score: 3300,  name: 'Ivana Bubeníčková',    party: 'ANO',    quip: 'Starostka Plzně 1. Konkurence přituhuje.' },
+    { score: 3960,  name: 'David Procházka',      party: 'ANO',    quip: 'Starosta Plzně 3. Sousední obvod nespí.' },
+    { score: 4680,  name: 'Lucie Kantorová',      party: 'ANO',    quip: 'Radní pro školství. Teď zkouší ona tebe.' },
+    { score: 5460,  name: 'Tomáš Soukup',         party: 'ANO',    quip: 'Starosta Plzně 4. Tempo dál roste.' },
+    { score: 6300,  name: 'Eliška Bartáková',     party: 'ANO',    quip: 'Radní města Plzně. Agenda houstne.' },
+    { score: 7200,  name: 'Vlastimil Gola',       party: 'ANO',    quip: 'Radní magistrátu. Blíž k centru moci.' },
+    { score: 8160,  name: 'Jiří Šrámek',          party: 'ANO',    quip: 'Radní pro sociální oblast. Jiný Šrámek, stejné tempo.' },
+    { score: 9180,  name: 'Michal Hausner',       party: 'ANO',    quip: 'Starosta Plzně 6 a dobrovolný hasič. Reflexy na místě.' },
+    { score: 10260, name: 'Martin Složil',        party: 'ANO',    quip: 'Uvolněný zastupitel. Ty ale zpomalit nemůžeš.' },
+    { score: 11400, name: 'Lukáš Hegner',         party: 'ODS',    quip: 'Advokát a zastupitel. Detaily rozhodují.' },
+    { score: 12600, name: 'David Šlouf',          party: 'ODS',    quip: 'Vedoucí prodeje. Umí uzavřít i tuhle hru.' },
+    { score: 13860, name: 'Martin Baxa',          party: 'ODS',    quip: 'Bývalý primátor. Ví, jak vysoko to jde.' },
+    { score: 15180, name: 'Pavel Šindelář',       party: 'ODS',    quip: 'Advokát. Malá chybka, velký důsledek.' },
+    { score: 16560, name: 'Lumír Aschenbrenner',  party: 'ODS',    quip: 'Senátor a starosta Slovan. Republiková liga.' },
+    { score: 18000, name: 'Veronika Jilichová Nová', party: 'ODS', quip: 'Lékařka. Rychlá diagnóza, rychlé kliky.' },
+    { score: 19500, name: 'Lucie Kužílková',      party: 'ODS',    quip: 'Živnostnice. Je na to sama, stejně jako ty teď.' },
+    { score: 21060, name: 'Helena Řežábová',      party: 'ODS',    quip: 'Provozní ředitelka. Provoz nesmí stát.' },
+    { score: 22680, name: 'Kristýna Nachtmann Švédová', party: 'ODS', quip: 'Ředitelka nadačního fondu. Tempo pro dobrou věc.' },
+    { score: 24360, name: 'Zdeněk Mádr',          party: 'ODS',    quip: 'Místostarosta Plzně 4. Blíží se druhá polovina.' },
+    { score: 26100, name: 'Tomáš Morávek',        party: 'PRO PLZEŇ', quip: 'Radní pro sport. Teď rozhoduje kondice.' },
+    { score: 27900, name: 'Tomáš Kotora',         party: 'PRO PLZEŇ', quip: 'Radní pro bezpečnost. Bez chybičky.' },
+    { score: 29760, name: 'Libuše Hubáčková',     party: 'PRO PLZEŇ', quip: 'Zastupitelka na dvou frontách. Stejně jako ty teď.' },
+    { score: 31680, name: 'Jiří Uhlík',           party: 'PRO PLZEŇ', quip: 'Kraj i obvod najednou. Multitasking level.' },
+    { score: 33660, name: 'Jiří Klečka',          party: 'PRO PLZEŇ', quip: 'Urolog. Přesná ruka, rychlý klik.' },
+    { score: 35700, name: 'Jiří Lodr',            party: 'PRO PLZEŇ', quip: 'Emeritní ředitel charity. Trpělivost už tu nepomůže.' },
+    { score: 37800, name: 'Štěpán Krňoul',        party: 'PRO PLZEŇ', quip: 'Učitel. Zkouší, jak zvládáš tempo.' },
+    { score: 39960, name: 'Roman Andrlík',        party: 'PRO PLZEŇ', quip: 'Místostarosta Slovan. Skoro tři čtvrtiny hotovo.' },
+    { score: 42180, name: 'Nikola Juhová',        party: 'PRO PLZEŇ', quip: 'Advokátka na dvou židlích. Přesnost nade vše.' },
+    { score: 44460, name: 'Jan Havel',            party: 'PRO PLZEŇ', quip: 'Starosta Lhoty. Poslední zastávka před finišem.' },
+    { score: 46800, name: 'Michal Vozobule',      party: 'Chceme Plzeň', quip: 'Učitel a zastupitel. Poslední kolo začíná.' },
+    { score: 49200, name: 'Zuzana Buriánová',     party: 'Chceme Plzeň', quip: 'Ředitelka školy. Žádné vyrušování, jen tempo.' },
+    { score: 51660, name: 'Ladislav Nový',        party: 'Chceme Plzeň', quip: 'Místostarosta Plzně 3. Skoro doma, skoro rychle jako ty.' },
+    { score: 54180, name: 'Petr Suchý',           party: 'Chceme Plzeň', quip: 'Ředitel IT firmy. Rozumí systémům, i tomuhle.' },
+    { score: 56760, name: 'Jitka Kylišová',       party: 'Chceme Plzeň', quip: 'Sociální pracovnice. Vytrvalost na prvním místě.' },
+    { score: 59400, name: 'Radoslav Škarda',      party: 'Chceme Plzeň', quip: 'Manažer kvality. Žádná chybka neprojde.' },
+    { score: 62100, name: 'Petr Šimon',           party: 'Chceme Plzeň', quip: 'Kulturní manažer. Umění je i v tomhle tempu.' },
+    { score: 64860, name: 'Ilona Jehličková',     party: 'Chceme Plzeň', quip: 'Pedagožka. Zkouší tvoji pozornost naostro.' },
+    { score: 67680, name: 'Jan Fluxa',            party: 'Chceme Plzeň', quip: 'Majitel startupu. Škáluje se i tahle hra.' },
+    { score: 70560, name: 'Ondřej Ženíšek',       party: 'Chceme Plzeň', quip: 'Místostarosta Plzně 3. Poslední krok před magistrátem.' },
+    { score: 73500, name: 'Roman Zarzycký', party: 'ANO', boss: true,
+      quip: '🎥 Vyhrál jsi! Běž na magistrát, buď primátor. (A natoč aspoň 3 videa denně. O všem.)' }
   ];
   var MAX_TIER_SCORE = RANKS[RANKS.length - 1].score;
 
@@ -93,7 +144,12 @@
 
   function spawnInterval(){ return lerp(1100, 480, difficultyFactor()); }
   function visibleDuration(){ return lerp(1500, 680, difficultyFactor()); }
-  function maxConcurrent(){ return score >= 300 ? 2 : 1; }
+  function maxConcurrent(){
+    var f = difficultyFactor();
+    if(f >= 0.6) return 3;
+    if(f >= 0.2) return 2;
+    return 1;
+  }
 
   function activeCount(){
     var n = 0;
@@ -107,17 +163,21 @@
     livesEl.textContent = s;
   }
 
+  function levelLabel(idx){ return (idx + 1) + '/' + RANKS.length; }
+
   function renderRank(){
-    rankEl.textContent = 'úroveň: ' + RANKS[rankIndex].name;
+    rankEl.textContent = 'úroveň ' + levelLabel(rankIndex) + ' · ' + RANKS[rankIndex].name;
   }
 
   function showMilestone(rank){
+    milestoneKickerEl.textContent = 'Milník · úroveň ' + levelLabel(rankIndex);
     milestoneNameEl.textContent = rank.name;
+    milestonePartyEl.textContent = rank.party || '';
     milestoneQuipEl.textContent = rank.quip || '';
     milestoneQuipEl.classList.toggle('is-hidden', !rank.quip);
     milestoneEl.classList.toggle('boss', !!rank.boss);
     milestoneEl.classList.add('show');
-    setTimeout(function(){ milestoneEl.classList.remove('show'); }, rank.boss ? 3200 : 2200);
+    setTimeout(function(){ milestoneEl.classList.remove('show'); }, rank.boss ? 3200 : 2000);
   }
 
   function checkRankUp(){
@@ -213,7 +273,7 @@
     playing = false;
     resetZones();
     finalScoreEl.textContent = score;
-    finalRankEl.textContent = 'dosažená úroveň: ' + RANKS[rankIndex].name;
+    finalRankEl.textContent = 'dosažená úroveň: ' + levelLabel(rankIndex) + ' · ' + RANKS[rankIndex].name + ' (' + RANKS[rankIndex].party + ')';
     overCard.classList.remove('hidden');
   }
 

@@ -128,12 +128,14 @@
 .pz-milestone.show{opacity:1;transform:translate(-50%, -50%) scale(1);}
 .pz-milestone .kicker{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.75);}
 .pz-milestone .name{font-size:1.15rem;font-weight:700;margin-top:2px;}
+.pz-milestone .party{font-size:.68rem;color:rgba(255,255,255,0.7);margin-top:2px;letter-spacing:.02em;}
 .pz-milestone .quip{font-size:.78rem;color:rgba(255,255,255,0.92);margin-top:6px;line-height:1.4;}
 .pz-milestone .quip.is-hidden{display:none;}
 .pz-milestone.boss{
   background:linear-gradient(135deg, rgba(242,134,47,0.96), rgba(255,201,60,0.96));
 }
 .pz-milestone.boss .name{font-size:1.3rem;}
+.pz-milestone.boss .party{color:rgba(255,255,255,0.85);}
 
 .pz-startcard, .pz-overcard{
   position:fixed;inset:0;z-index:8;
