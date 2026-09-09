@@ -1098,7 +1098,7 @@ section { padding: 72px 0; }
   .contact-strip { flex-direction: column; align-items: flex-start; }
 }
 
-/* Odkaz na fyzikální krystal (o-mne.html) — výrazná karta, ať se neztratí mezi badge */
+/* Odkaz na herní kostku (o-mne.html) — výrazná karta, ať se neztratí mezi badge */
 .lab-callout {
   margin-top: 20px;
   display: flex;

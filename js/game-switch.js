@@ -18,7 +18,7 @@
     } else {
       curveRoot.classList.remove('game-hidden');
       crystalRoot.classList.add('game-hidden');
-      btn.textContent = '💎 Krystal';
+      btn.textContent = '🎲 Kostka';
       if(corner) corner.innerHTML = 'vlastní herní engine &middot; <b>Canvas 2D</b>';
       if(window.PSCurve) window.PSCurve.setActive(true);
       if(window.PSCrystal) window.PSCrystal.setActive(false);

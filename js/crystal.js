@@ -12,13 +12,27 @@
   var toastEl = document.getElementById('toast');
   var tiltBtn = document.getElementById('tiltBtn');
 
+  // ---------- die faces: campaign priorities + one brand face ----------
+  // 5 faces carry the approved 2026 priority slogans (verbatim from the
+  // campaign leaflet copy), 1 face is a plain brand card. Order here maps
+  // 1:1 onto THREE.BoxGeometry's default material groups: [+X,-X,+Y,-Y,+Z,-Z].
+  var FACES = [
+    { id: 'young',    kind: 'priority', emoji: '🧒', title: 'Budoucnost pro mladé', sub: 'Stavíme školky, aby v Plzni 3 mělo místo každé dítě.', colorA: '#9b3fae', colorB: '#d95c86' },
+    { id: 'office',   kind: 'priority', emoji: '💻', title: 'Moderní úřad',         sub: 'Chceme úřad, který funguje z mobilu, ne z fronty.',     colorA: '#3a2f7d', colorB: '#5c6fd9' },
+    { id: 'green',    kind: 'priority', emoji: '🌳', title: 'Více zeleně',          sub: 'Měníme beton za parky.',                                colorA: '#1f6b46', colorB: '#3fae7b' },
+    { id: 'traffic',  kind: 'priority', emoji: '🚗', title: 'Klidnější obvod',      sub: 'Méně tranzitu, víc klidu pro lidi.',                    colorA: '#2f5d7d', colorB: '#4f8fae' },
+    { id: 'housing',  kind: 'priority', emoji: '🏠', title: 'Dostupné bydlení',     sub: 'Stavíme byty pro mladé rodiny.',                        colorA: '#ae7b3f', colorB: '#ffc93c' },
+    { id: 'brand',    kind: 'brand',    emoji: '🎲', title: 'PAVEL ŠRÁMEK',         sub: 'pavelsramek.com',                                       colorA: '#1a1224', colorB: '#0b0e16' }
+  ];
+
   // ---------- gamification: persistent score + badges (localStorage, per browser) ----------
-  var STORAGE_KEY = 'pscrystal_stats_v1';
+  var STORAGE_KEY = 'pskostka_stats_v1';
   var BADGES = [
-    { id: 'first-touch', label: 'První dotek', test: function(s){ return s.totalThrows >= 1; } },
-    { id: 'speedster',   label: 'Rychlík',      test: function(s){ return s.maxSpeed >= 7; } },
-    { id: 'bouncer',     label: 'Mistr odrazů', test: function(s){ return s.totalBounces >= 25; } },
-    { id: 'high-score',  label: '1000 bodů',    test: function(s){ return s.highScore >= 1000; } }
+    { id: 'first-touch', label: 'První dotek',      test: function(s){ return s.totalThrows >= 1; } },
+    { id: 'speedster',   label: 'Rychlík',           test: function(s){ return s.maxSpeed >= 7; } },
+    { id: 'bouncer',     label: 'Mistr odrazů',      test: function(s){ return s.totalBounces >= 25; } },
+    { id: 'high-score',  label: '1000 bodů',         test: function(s){ return s.highScore >= 1000; } },
+    { id: 'collector',   label: 'Sběratel priorit',  test: function(s){ return (s.seenFaces || []).length >= 5; } }
   ];
 
   function loadStats(){
@@ -32,11 +46,12 @@
           totalThrows: parsed.totalThrows || 0,
           totalBounces: parsed.totalBounces || 0,
           maxSpeed: parsed.maxSpeed || 0,
-          unlocked: parsed.unlocked || []
+          unlocked: parsed.unlocked || [],
+          seenFaces: parsed.seenFaces || []
         };
       }
     }catch(e){}
-    return { score: 0, highScore: 0, totalThrows: 0, totalBounces: 0, maxSpeed: 0, unlocked: [] };
+    return { score: 0, highScore: 0, totalThrows: 0, totalBounces: 0, maxSpeed: 0, unlocked: [], seenFaces: [] };
   }
   function saveStats(){
     try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(stats)); }catch(e){}
@@ -57,20 +72,23 @@
   scoreValueEl.textContent = stats.score;
   scoreBestEl.textContent = stats.highScore;
 
-  function queueToast(text){
-    toastQueue.push(text);
+  // queueToast: html is shown as-is; variant 'slogan' gets the taller/centered
+  // card style (see css .toast.slogan), plain badge toasts keep the pill style.
+  function queueToast(html, opts){
+    toastQueue.push({ html: html, variant: (opts && opts.variant) || 'badge', duration: (opts && opts.duration) || 2600 });
     drainToastQueue();
   }
   function drainToastQueue(){
     if(toastShowing || toastQueue.length === 0) return;
     toastShowing = true;
-    var text = toastQueue.shift();
-    toastEl.innerHTML = 'Odznak: <b>' + text + '</b>';
+    var item = toastQueue.shift();
+    toastEl.innerHTML = item.html;
+    toastEl.className = item.variant === 'slogan' ? 'slogan' : '';
     toastEl.classList.add('show');
     setTimeout(function(){
       toastEl.classList.remove('show');
       setTimeout(function(){ toastShowing = false; drainToastQueue(); }, 400);
-    }, 2600);
+    }, item.duration);
   }
 
   function addScore(points){
@@ -86,7 +104,7 @@
     BADGES.forEach(function(b){
       if(stats.unlocked.indexOf(b.id) === -1 && b.test(stats)){
         stats.unlocked.push(b.id);
-        queueToast(b.label);
+        queueToast('Odznak: <b>' + b.label + '</b>');
         changed = true;
       }
     });
@@ -118,40 +136,124 @@
   var orbitLight = new THREE.PointLight(0xffc93c, 2.6, 30);
   scene.add(orbitLight);
 
-  // ---------- the crystal ----------
-  var geo = new THREE.IcosahedronGeometry(1.65, 0);
-  var colorTop = new THREE.Color(0x9b3fae);
-  var colorMid = new THREE.Color(0xd95c86);
-  var colorBot = new THREE.Color(0xffc93c);
-
-  var posAttr = geo.attributes.position;
-  var colors = [];
-  for(var i = 0; i < posAttr.count; i++){
-    var y = posAttr.getY(i);
-    var t = (y + 1.65) / 3.3; // 0..1 bottom..top
-    var c = t > 0.5
-      ? colorMid.clone().lerp(colorTop, (t - 0.5) * 2)
-      : colorBot.clone().lerp(colorMid, t * 2);
-    colors.push(c.r, c.g, c.b);
+  // ---------- texture helpers: draw one canvas "card" per die face ----------
+  function wrapLines(ctx, text, maxWidth){
+    var words = text.split(' ');
+    var lines = [];
+    var cur = '';
+    for(var i = 0; i < words.length; i++){
+      var test = cur ? cur + ' ' + words[i] : words[i];
+      if(ctx.measureText(test).width > maxWidth && cur){
+        lines.push(cur);
+        cur = words[i];
+      } else {
+        cur = test;
+      }
+    }
+    if(cur) lines.push(cur);
+    return lines;
   }
-  geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  function drawWrapped(ctx, text, cx, cy, maxWidth, lineHeight){
+    var lines = wrapLines(ctx, text, maxWidth);
+    var startY = cy - (lines.length - 1) * lineHeight / 2;
+    for(var j = 0; j < lines.length; j++){
+      ctx.fillText(lines[j], cx, startY + j * lineHeight);
+    }
+  }
 
-  var mat = new THREE.MeshPhysicalMaterial({
-    vertexColors: true,
-    roughness: 0.22,
-    metalness: 0.15,
-    clearcoat: 0.6,
-    clearcoatRoughness: 0.25,
-    flatShading: true,
-    emissive: 0x1a0f24,
-    emissiveIntensity: 0.25
+  function makeFaceTexture(face){
+    var size = 512;
+    var canvas = document.createElement('canvas');
+    canvas.width = canvas.height = size;
+    var ctx = canvas.getContext('2d');
+
+    var g = ctx.createLinearGradient(0, 0, size, size);
+    g.addColorStop(0, face.colorA);
+    g.addColorStop(1, face.colorB);
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, size, size);
+
+    var rg = ctx.createRadialGradient(size * 0.5, size * 0.36, size * 0.05, size * 0.5, size * 0.5, size * 0.66);
+    rg.addColorStop(0, 'rgba(255,255,255,0.18)');
+    rg.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = rg;
+    ctx.fillRect(0, 0, size, size);
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+    ctx.lineWidth = 6;
+    ctx.strokeRect(16, 16, size - 32, size - 32);
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    ctx.font = '148px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+    ctx.fillText(face.emoji, size / 2, size * 0.35);
+
+    ctx.fillStyle = '#fff';
+    ctx.font = face.kind === 'brand' ? '700 42px Inter, sans-serif' : '700 48px Inter, sans-serif';
+    drawWrapped(ctx, face.title, size / 2, size * 0.58, size - 90, 54);
+
+    if(face.sub){
+      ctx.fillStyle = 'rgba(255,255,255,0.88)';
+      ctx.font = '400 29px Inter, sans-serif';
+      drawWrapped(ctx, face.sub, size / 2, size * 0.75, size - 110, 35);
+    }
+
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.font = '600 22px Inter, sans-serif';
+    ctx.fillText('PLZEŇ 3 · 2026', size / 2, size - 34);
+
+    var tex = new THREE.CanvasTexture(canvas);
+    if(renderer.capabilities && renderer.capabilities.getMaxAnisotropy){
+      tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    }
+    return tex;
+  }
+
+  // ---------- the die ----------
+  // BoxGeometry's default material groups map to faces in this order:
+  // [+X, -X, +Y, -Y, +Z, -Z] — FACES above is written to match.
+  var DIE_SIZE = 2.2;
+  var geo = new THREE.BoxGeometry(DIE_SIZE, DIE_SIZE, DIE_SIZE);
+  var materials = FACES.map(function(face){
+    return new THREE.MeshPhysicalMaterial({
+      map: makeFaceTexture(face),
+      roughness: 0.38,
+      metalness: 0.06,
+      clearcoat: 0.35,
+      clearcoatRoughness: 0.35
+    });
   });
 
-  var crystal = new THREE.Mesh(geo, mat);
+  var crystal = new THREE.Mesh(geo, materials);
   scene.add(crystal);
 
-  // soft contact shadow beneath the crystal
-  var shadowGeo = new THREE.CircleGeometry(1.5, 40);
+  // face normals in the die's own local space, index-matched to FACES / the
+  // material groups above — used to work out which face ends up camera-facing
+  var FACE_NORMALS = [
+    new THREE.Vector3(1, 0, 0),
+    new THREE.Vector3(-1, 0, 0),
+    new THREE.Vector3(0, 1, 0),
+    new THREE.Vector3(0, -1, 0),
+    new THREE.Vector3(0, 0, 1),
+    new THREE.Vector3(0, 0, -1)
+  ];
+  // canonical "which way is up" for each face's printed texture — used so
+  // that whichever face lands toward the camera, its slogan lands right
+  // side up rather than at some arbitrary 90°/180° roll. Matched against
+  // makeFaceTexture()'s actual UV orientation via visual QA.
+  var FACE_UP = [
+    new THREE.Vector3(0, 1, 0),
+    new THREE.Vector3(0, 1, 0),
+    new THREE.Vector3(0, 0, -1),
+    new THREE.Vector3(0, 0, 1),
+    new THREE.Vector3(0, 1, 0),
+    new THREE.Vector3(0, 1, 0)
+  ];
+  var CAM_DIR = new THREE.Vector3(0, 0, 1);
+
+  // soft contact shadow beneath the die
+  var shadowGeo = new THREE.CircleGeometry(1.7, 40);
   var shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.35 });
   var shadowBlob = new THREE.Mesh(shadowGeo, shadowMat);
   shadowBlob.rotation.x = -Math.PI / 2;
@@ -164,7 +266,7 @@
     var vFOV = camera.fov * Math.PI / 180;
     var height = 2 * Math.tan(vFOV / 2) * camera.position.z;
     var width = height * camera.aspect;
-    var margin = 1.7; // ~ crystal radius + a little breathing room
+    var margin = 2.0; // ~ die's rotated corner reach + a little breathing room
     boundX = Math.max(width / 2 - margin, 0.6);
     boundY = Math.max(height / 2 - margin, 0.6);
   }
@@ -257,6 +359,84 @@
   var hintHidden = false;
   var idleTimer = 0;
 
+  // ---------- landing: once the die settles, snap it flat onto whichever
+  // face is currently most toward the camera, then reveal that slogan.
+  // The target orientation is computed analytically (not just "round each
+  // Euler angle to the nearest 90°") so the printed text always lands the
+  // right way up instead of at some arbitrary 90°/180° roll. ----------
+  var LAND_MS = 480;
+  var landing = false;
+  var landed = false;
+  var landedFaceIdx = -1;
+  var landStartTime = 0;
+  var landStartQuat = new THREE.Quaternion();
+  var landTargetQuat = new THREE.Quaternion();
+  var tmpNormal = new THREE.Vector3();
+  var tmpRight = new THREE.Vector3();
+  var tmpMatrix = new THREE.Matrix4();
+
+  function facingCameraIndex(){
+    var best = -1, bestDot = -2;
+    for(var i = 0; i < FACE_NORMALS.length; i++){
+      tmpNormal.copy(FACE_NORMALS[i]).applyQuaternion(crystal.quaternion);
+      var d = tmpNormal.dot(CAM_DIR);
+      if(d > bestDot){ bestDot = d; best = i; }
+    }
+    return best;
+  }
+
+  // the exact orientation where FACE_NORMALS[idx] points at the camera and
+  // FACE_UP[idx] points straight up on screen — i.e. that face's slogan
+  // rendered upright and facing the viewer
+  function uprightQuaternionFor(idx){
+    var n = FACE_NORMALS[idx];
+    var up = FACE_UP[idx];
+    tmpRight.crossVectors(up, n).normalize();
+    tmpMatrix.set(
+      tmpRight.x, tmpRight.y, tmpRight.z, 0,
+      up.x,       up.y,       up.z,       0,
+      n.x,        n.y,        n.z,        0,
+      0, 0, 0, 1
+    );
+    return new THREE.Quaternion().setFromRotationMatrix(tmpMatrix);
+  }
+
+  function startLanding(){
+    landing = true;
+    landStartTime = performance.now();
+    landStartQuat.copy(crystal.quaternion);
+    landedFaceIdx = facingCameraIndex();
+    landTargetQuat.copy(uprightQuaternionFor(landedFaceIdx));
+    // slerp the short way round
+    if(landStartQuat.dot(landTargetQuat) < 0){
+      landTargetQuat.set(-landTargetQuat.x, -landTargetQuat.y, -landTargetQuat.z, -landTargetQuat.w);
+    }
+  }
+
+  function revealLandedFace(){
+    var idx = landedFaceIdx;
+    var face = FACES[idx];
+    if(!face) return;
+    if(face.kind === 'priority'){
+      if(stats.seenFaces.indexOf(face.id) === -1){
+        stats.seenFaces.push(face.id);
+        saveStats();
+      }
+      addScore(20);
+      checkBadges();
+      queueToast(
+        face.emoji + ' <b>' + face.title + '</b><span class="toast-sub">' + face.sub + '</span>',
+        { variant: 'slogan', duration: 3200 }
+      );
+    } else {
+      addScore(8);
+      queueToast(
+        face.emoji + ' <b>' + face.title + '</b><span class="toast-sub">' + face.sub + '</span>',
+        { variant: 'slogan', duration: 2600 }
+      );
+    }
+  }
+
   function updatePointerNDC(clientX, clientY){
     var rect = renderer.domElement.getBoundingClientRect();
     pointerNDC.x = ((clientX - rect.left) / rect.width) * 2 - 1;
@@ -279,6 +459,9 @@
   function pointerDown(clientX, clientY){
     if(!hitTestCrystal(clientX, clientY)) return;
     dragging = true;
+    landed = false;
+    landing = false;
+    idleTimer = 0;
     stage.classList.add('dragging');
     if(!hintHidden){ hint.classList.add('is-hidden'); hintHidden = true; }
     intersectDragPlane();
@@ -309,7 +492,7 @@
     vel.copy(sampledVel);
     vel.z = 0;
     // throwing motion imparts spin perpendicular to the velocity direction —
-    // like flicking a ball, it tumbles in the direction it was thrown
+    // like flicking a die, it tumbles in the direction it was thrown
     angVel.x += -sampledVel.y * 0.55;
     angVel.y += sampledVel.x * 0.55;
     angVel.z += (sampledVel.x - sampledVel.y) * 0.12;
@@ -328,7 +511,7 @@
   window.addEventListener('pointercancel', pointerUp);
 
   if(reduceMotion){
-    hint.textContent = 'Krystal reaguje na kliknutí a tažení';
+    hint.textContent = 'Kostka reaguje na kliknutí a tažení';
   }
 
   // ---------- main loop ----------
@@ -364,36 +547,51 @@
       var speed2 = vel.x * vel.x + vel.y * vel.y;
       var spin2 = angVel.lengthSq();
 
-      if(speed2 < 0.02 && spin2 < 0.05){
-        idleTimer += dt;
-      } else {
-        idleTimer = 0;
+      if(landed && (speed2 > 0.05 || spin2 > 0.08)){
+        // something (usually tilt) is pushing hard enough to wake it back up
+        landed = false;
       }
 
-      // wall collisions with a bit of restitution + a spin kick
-      if(pos.x > boundX){ pos.x = boundX; onBounce(Math.abs(vel.x)); vel.x *= -0.72; angVel.y += -vel.x * 0.4; triggerSquash(1, 0); }
-      else if(pos.x < -boundX){ pos.x = -boundX; onBounce(Math.abs(vel.x)); vel.x *= -0.72; angVel.y += -vel.x * 0.4; triggerSquash(1, 0); }
-      if(pos.y > boundY){ pos.y = boundY; onBounce(Math.abs(vel.y)); vel.y *= -0.72; angVel.x += vel.y * 0.4; triggerSquash(0, 1); }
-      else if(pos.y < -boundY){ pos.y = -boundY; onBounce(Math.abs(vel.y)); vel.y *= -0.72; angVel.x += vel.y * 0.4; triggerSquash(0, 1); }
+      if(!landed && !landing){
+        if(speed2 < 0.02 && spin2 < 0.05){ idleTimer += dt; } else { idleTimer = 0; }
+      }
+
+      // wall collisions with a bit of restitution + a spin kick — a hard
+      // bounce always wakes the die up, landed or not
+      if(pos.x > boundX){ pos.x = boundX; onBounce(Math.abs(vel.x)); vel.x *= -0.72; angVel.y += -vel.x * 0.4; triggerSquash(1, 0); landed = false; landing = false; }
+      else if(pos.x < -boundX){ pos.x = -boundX; onBounce(Math.abs(vel.x)); vel.x *= -0.72; angVel.y += -vel.x * 0.4; triggerSquash(1, 0); landed = false; landing = false; }
+      if(pos.y > boundY){ pos.y = boundY; onBounce(Math.abs(vel.y)); vel.y *= -0.72; angVel.x += vel.y * 0.4; triggerSquash(0, 1); landed = false; landing = false; }
+      else if(pos.y < -boundY){ pos.y = -boundY; onBounce(Math.abs(vel.y)); vel.y *= -0.72; angVel.x += vel.y * 0.4; triggerSquash(0, 1); landed = false; landing = false; }
 
       // damping — a touch livelier while fast, calmer near rest
       vel.multiplyScalar(Math.pow(0.985, dt * 60));
       angVel.multiplyScalar(Math.pow(0.988, dt * 60));
 
-      // once it settles, ease in a gentle perpetual idle tumble so it never
-      // reads as "stopped" — the whole point of this piece is that it's always alive
+      // once it truly settles (and isn't being held tilted), start the
+      // snap-to-face landing sequence instead of tumbling forever
       var tiltActive = tiltEnabled && (Math.abs(gravity.x) > 0.05 || Math.abs(gravity.y) > 0.05);
-      if(idleTimer > 0.6 && !tiltActive){
-        angVel.x += (0.22 - angVel.x) * 0.01;
-        angVel.y += (0.28 - angVel.y) * 0.01;
-        pos.y += Math.sin(now * 0.0011) * 0.0012;
+      if(!landed && !landing && idleTimer > 0.6 && !tiltActive){
+        startLanding();
       }
     }
 
+    if(landing){
+      var lp = Math.min((now - landStartTime) / LAND_MS, 1);
+      var ease = 1 - Math.pow(1 - lp, 3);
+      crystal.quaternion.copy(landStartQuat).slerp(landTargetQuat, ease);
+      if(lp >= 1){
+        crystal.quaternion.copy(landTargetQuat);
+        landing = false;
+        landed = true;
+        revealLandedFace();
+      }
+    } else if(!landed){
+      crystal.rotation.x += angVel.x * dt;
+      crystal.rotation.y += angVel.y * dt;
+      crystal.rotation.z += angVel.z * dt;
+    }
+
     crystal.position.copy(pos);
-    crystal.rotation.x += angVel.x * dt;
-    crystal.rotation.y += angVel.y * dt;
-    crystal.rotation.z += angVel.z * dt;
 
     // squash & stretch settle
     squash *= Math.pow(0.82, dt * 60);
