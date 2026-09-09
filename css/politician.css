@@ -75,42 +75,30 @@
   100%{ box-shadow:0 0 40px -6px rgba(155,63,174,0.5); }
 }
 
+/* Zones no longer sit at fixed compass points around the avatar — JS gives
+   each one a random left/top (in px, viewport-relative) on every spawn, and
+   this single rule set handles the visual state at whatever position that
+   turns out to be. position:fixed is relative to the viewport (pz-stage /
+   pz-arena have no transform, so they don't create a new containing block),
+   and translate(-50%,-50%) keeps left/top pinned to the zone's own center
+   regardless of the scale that's layered on top of it. */
 .pz-zone{
-  position:absolute;
-  width:26%;height:26%;
+  position:fixed;left:0;top:0;
+  width:clamp(76px, 20vmin, 116px);height:clamp(76px, 20vmin, 116px);
   border-radius:18px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:2px;
   cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
-  opacity:0;transform:scale(0.6);
+  opacity:0;transform:translate(-50%, -50%) scale(0.6);
   transition:opacity .12s ease, transform .12s ease;
   pointer-events:none;
   background:linear-gradient(135deg, rgba(155,63,174,0.28), rgba(217,92,134,0.28));
   border:1px solid rgba(255,255,255,0.22);
+  z-index:3;
 }
-.pz-zone.active{opacity:1;transform:scale(1);pointer-events:auto;}
-.pz-zone.pop{opacity:0;transform:scale(1.35);transition:opacity .18s ease, transform .18s ease;}
-.pz-zone.missed{opacity:0;transform:scale(0.6) rotate(8deg);transition:opacity .22s ease, transform .22s ease;}
-
-.pz-zone.n{left:50%;top:0;transform:translate(-50%, 0) scale(0.6);}
-.pz-zone.n.active{transform:translate(-50%, 0) scale(1);}
-.pz-zone.n.pop{transform:translate(-50%, 0) scale(1.35);}
-.pz-zone.n.missed{transform:translate(-50%, 0) scale(0.6) rotate(8deg);}
-
-.pz-zone.s{left:50%;bottom:0;transform:translate(-50%, 0) scale(0.6);}
-.pz-zone.s.active{transform:translate(-50%, 0) scale(1);}
-.pz-zone.s.pop{transform:translate(-50%, 0) scale(1.35);}
-.pz-zone.s.missed{transform:translate(-50%, 0) scale(0.6) rotate(8deg);}
-
-.pz-zone.w{left:0;top:50%;transform:translate(0, -50%) scale(0.6);}
-.pz-zone.w.active{transform:translate(0, -50%) scale(1);}
-.pz-zone.w.pop{transform:translate(0, -50%) scale(1.35);}
-.pz-zone.w.missed{transform:translate(0, -50%) scale(0.6) rotate(8deg);}
-
-.pz-zone.e{right:0;top:50%;transform:translate(0, -50%) scale(0.6);}
-.pz-zone.e.active{transform:translate(0, -50%) scale(1);}
-.pz-zone.e.pop{transform:translate(0, -50%) scale(1.35);}
-.pz-zone.e.missed{transform:translate(0, -50%) scale(0.6) rotate(8deg);}
+.pz-zone.active{opacity:1;transform:translate(-50%, -50%) scale(1);pointer-events:auto;}
+.pz-zone.pop{opacity:0;transform:translate(-50%, -50%) scale(1.35);transition:opacity .18s ease, transform .18s ease;}
+.pz-zone.missed{opacity:0;transform:translate(-50%, -50%) scale(0.6) rotate(8deg);transition:opacity .22s ease, transform .22s ease;}
 
 .pz-icon-emoji{font-size:min(6.5vmin, 34px);line-height:1;}
 .pz-icon-label{font-size:.56rem;color:#fff;font-weight:600;text-align:center;line-height:1.15;padding:0 4px;}

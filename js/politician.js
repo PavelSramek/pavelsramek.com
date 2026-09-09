@@ -157,6 +157,60 @@
     return n;
   }
 
+  // ---------- random full-screen placement ----------
+  // Bubbles now land anywhere on the display rather than at the 4 compass
+  // points. Keep them off the fixed chrome around the edges (backlink,
+  // score box, lives HUD, tech-credit corner, the game-switch button) and
+  // away from any bubble that's already on screen, retrying a handful of
+  // times before just giving up and centering.
+  function excludedRects(){
+    var w = window.innerWidth, h = window.innerHeight;
+    var cw = Math.min(190, w * 0.5);
+    var chTop = Math.min(140, h * 0.22);
+    var chBacklink = Math.min(70, h * 0.12);
+    var chBottom = Math.min(140, h * 0.22);
+    var chCorner = Math.min(70, h * 0.12);
+    var midW = Math.min(180, w * 0.5);
+    var midBand = Math.min(80, h * 0.14);
+    return [
+      { x1: 0, y1: 0, x2: cw, y2: chBacklink },                    // #backlink
+      { x1: w - cw, y1: 0, x2: w, y2: chTop },                     // score box
+      { x1: 0, y1: h - chBottom, x2: cw, y2: h },                  // lives HUD
+      { x1: w - cw, y1: h - chCorner, x2: w, y2: h },              // tech-credit corner
+      { x1: w - midW, y1: h / 2 - midBand, x2: w, y2: h / 2 + midBand } // game-switch button
+    ];
+  }
+
+  function rectsOverlap(ax1, ay1, ax2, ay2, r){
+    return ax1 < r.x2 && ax2 > r.x1 && ay1 < r.y2 && ay2 > r.y1;
+  }
+
+  function activeRects(exclude){
+    var out = [];
+    zones.forEach(function(z){
+      if(z !== exclude && (z.state === 'active' || z.state === 'pop') && z.half){
+        out.push({ x1: z.cx - z.half, y1: z.cy - z.half, x2: z.cx + z.half, y2: z.cy + z.half });
+      }
+    });
+    return out;
+  }
+
+  function randomSpawnPos(size, exclude){
+    var w = window.innerWidth, h = window.innerHeight;
+    var half = size / 2;
+    var pad = 12;
+    var minX = pad + half, maxX = Math.max(minX, w - pad - half);
+    var minY = pad + half, maxY = Math.max(minY, h - pad - half);
+    var rects = excludedRects().concat(activeRects(exclude));
+    for(var i = 0; i < 14; i++){
+      var x = minX + Math.random() * (maxX - minX);
+      var y = minY + Math.random() * (maxY - minY);
+      var bad = rects.some(function(r){ return rectsOverlap(x - half, y - half, x + half, y + half, r); });
+      if(!bad) return { x: x, y: y };
+    }
+    return { x: w / 2, y: h / 2 };
+  }
+
   function renderLives(){
     var s = '';
     for(var i = 0; i < 3; i++){ s += i < lives ? '❤️' : '🖤'; }
@@ -241,6 +295,15 @@
     var icon = ICONS[Math.floor(Math.random() * ICONS.length)];
     z.emojiEl.textContent = icon.emoji;
     z.labelEl.textContent = icon.label;
+
+    var size = parseFloat(getComputedStyle(z.el).width) || 100;
+    var pos = randomSpawnPos(size, z);
+    z.cx = pos.x;
+    z.cy = pos.y;
+    z.half = size / 2;
+    z.el.style.left = pos.x + 'px';
+    z.el.style.top = pos.y + 'px';
+
     z.state = 'active';
     z.visibleDuration = visibleDuration();
     z.timeLeft = z.visibleDuration;
