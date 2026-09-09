@@ -10,6 +10,7 @@
   var scoreBestEl = document.getElementById('scoreBest');
   var scoreBadgesEl = document.getElementById('scoreBadges');
   var toastEl = document.getElementById('toast');
+  var tiltBtn = document.getElementById('tiltBtn');
 
   // ---------- gamification: persistent score + badges (localStorage, per browser) ----------
   var STORAGE_KEY = 'pscrystal_stats_v1';
@@ -177,6 +178,64 @@
   window.addEventListener('resize', onResize);
   computeBounds();
 
+  // ---------- phone tilt → gravity ----------
+  // Calibrated on whatever position the phone happens to be in when tilt
+  // gets enabled, rather than assuming a fixed "upright" angle — so it
+  // works whether it's held flat, angled, in one hand, etc. gravity.x/y
+  // stay in -1..1 and are read every frame in tick(). If the pull ever
+  // feels backwards on a real phone, flip the sign on that one axis below.
+  var tiltSupported = 'DeviceOrientationEvent' in window;
+  var tiltEnabled = false;
+  var tiltBaseline = null;
+  var gravity = { x: 0, y: 0 };
+  var TILT_RANGE = 26;       // degrees of tilt to reach full gravity strength
+  var GRAVITY_STRENGTH = 10; // world units / s^2 at full tilt
+
+  function handleOrientation(e){
+    if(e.beta === null || e.gamma === null) return;
+    if(!tiltBaseline){ tiltBaseline = { beta: e.beta, gamma: e.gamma }; return; }
+    var dGamma = e.gamma - tiltBaseline.gamma; // left/right
+    var dBeta = e.beta - tiltBaseline.beta;    // forward/back
+    gravity.x = Math.max(-1, Math.min(1, dGamma / TILT_RANGE));
+    gravity.y = Math.max(-1, Math.min(1, dBeta / TILT_RANGE));
+  }
+
+  function startTilt(){
+    tiltEnabled = true;
+    tiltBaseline = null; // recalibrate from the very next reading
+    window.addEventListener('deviceorientation', handleOrientation);
+    if(tiltBtn) tiltBtn.classList.add('is-hidden');
+    if(!hintHidden){ hint.classList.add('is-hidden'); hintHidden = true; }
+  }
+
+  function initTilt(){
+    if(!tiltSupported || reduceMotion) return;
+    var DOE = window.DeviceOrientationEvent;
+    if(typeof DOE.requestPermission === 'function'){
+      // iOS 13+ requires an explicit tap before it will grant sensor access
+      if(tiltBtn){
+        tiltBtn.classList.remove('is-hidden');
+        tiltBtn.addEventListener('click', function(){
+          DOE.requestPermission().then(function(state){
+            if(state === 'granted') startTilt();
+          }).catch(function(){});
+        });
+      }
+    } else {
+      // everywhere else: no gesture needed, but only switch tilt "on"
+      // once a reading with real numbers actually arrives (desktops often
+      // expose the event with null values, which shouldn't count)
+      var probe = function(e){
+        if(e.beta !== null && e.gamma !== null){
+          window.removeEventListener('deviceorientation', probe);
+          startTilt();
+        }
+      };
+      window.addEventListener('deviceorientation', probe);
+    }
+  }
+  initTilt();
+
   // ---------- physics state ----------
   var pos = new THREE.Vector3(0, 0, 0);
   var vel = new THREE.Vector3(0, 0, 0);
@@ -281,6 +340,15 @@
     last = now;
 
     if(!dragging){
+      if(tiltEnabled){
+        vel.x += gravity.x * GRAVITY_STRENGTH * dt;
+        vel.y -= gravity.y * GRAVITY_STRENGTH * dt;
+        // a little roll in the direction it's being pulled, same spirit as
+        // the throw's spin-perpendicular-to-motion below
+        angVel.x += -gravity.y * dt * 1.4;
+        angVel.y += gravity.x * dt * 1.4;
+      }
+
       // integrate free flight
       pos.addScaledVector(vel, dt);
 
@@ -305,7 +373,8 @@
 
       // once it settles, ease in a gentle perpetual idle tumble so it never
       // reads as "stopped" — the whole point of this piece is that it's always alive
-      if(idleTimer > 0.6){
+      var tiltActive = tiltEnabled && (Math.abs(gravity.x) > 0.05 || Math.abs(gravity.y) > 0.05);
+      if(idleTimer > 0.6 && !tiltActive){
         angVel.x += (0.22 - angVel.x) * 0.01;
         angVel.y += (0.28 - angVel.y) * 0.01;
         pos.y += Math.sin(now * 0.0011) * 0.0012;
