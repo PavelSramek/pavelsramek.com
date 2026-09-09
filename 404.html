@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+Pro:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/crystal.css">
 <link rel="stylesheet" href="css/curve.css">
+<link rel="stylesheet" href="css/politician.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
@@ -63,10 +64,51 @@
   </div>
 </div>
 
+<div id="politicianRoot" class="game-hidden">
+  <div class="pz-stage">
+    <div class="pz-hud">
+      <div class="title">Život</div>
+      <div class="pz-lives" id="pzLives">❤️❤️❤️</div>
+    </div>
+    <div class="pz-score-box">
+      <div class="title">Skóre</div>
+      <div class="value" id="pzScoreValue">0</div>
+      <div class="best">nejlepší: <span id="pzScoreBest">0</span></div>
+      <div class="rank" id="pzRank"></div>
+    </div>
+    <div class="pz-arena" id="pzArena">
+      <div class="pz-avatar" id="pzAvatar">🧑‍💼</div>
+      <div class="pz-zone n" id="pzZoneN"><span class="pz-icon-emoji"></span><span class="pz-icon-label"></span></div>
+      <div class="pz-zone e" id="pzZoneE"><span class="pz-icon-emoji"></span><span class="pz-icon-label"></span></div>
+      <div class="pz-zone s" id="pzZoneS"><span class="pz-icon-emoji"></span><span class="pz-icon-label"></span></div>
+      <div class="pz-zone w" id="pzZoneW"><span class="pz-icon-emoji"></span><span class="pz-icon-label"></span></div>
+    </div>
+    <div class="pz-milestone" id="pzMilestone">
+      <div class="kicker">Milník</div>
+      <div class="name" id="pzMilestoneName"></div>
+      <div class="quip is-hidden" id="pzMilestoneQuip"></div>
+    </div>
+    <div class="pz-startcard" id="pzStartCard">
+      <div class="wow">Wow wow wow!</div>
+      <h1>Zvládneš být politikem?</h1>
+      <p>404 &middot; tahle stránka taky neexistuje, ale tahle hra ano. Klikej na akce, které se objeví kolem tebe na všech stranách, než zmizí.</p>
+      <div class="tap" id="pzStartTap">Klepni a hraj</div>
+    </div>
+    <div class="pz-overcard hidden" id="pzOverCard">
+      <h1>Volební období skončilo</h1>
+      <div class="final" id="pzFinalScore">0</div>
+      <div class="rank-final" id="pzFinalRank"></div>
+      <p>Ale demokracie žije dál.</p>
+      <div class="tap" id="pzRetryTap">Zkusit znovu</div>
+    </div>
+  </div>
+</div>
+
 <div id="corner">vlastní 3D scéna &middot; <b>WebGL</b></div>
 
 <script src="js/crystal.js"></script>
 <script src="js/curve.js"></script>
+<script src="js/politician.js"></script>
 <script src="js/game-switch.js"></script>
 </body>
 </html>
