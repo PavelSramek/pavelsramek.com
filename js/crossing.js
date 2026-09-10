@@ -44,7 +44,7 @@
     { max: 2,  text: 'Ani se ti nepodařilo pořádně vykročit.' },
     { max: 6,  text: 'Paní s holí tě sejmula hned na začátku. Bezpečná zóna, jasně.' },
     { max: 13, text: 'Prošel jsi kolem obyčejného provozu. Sdílená zóna, žádná panika.' },
-    { max: 21, text: 'Solidní průjezd. Trolejbus na tebe ještě nedosáhl.' },
+    { max: 21, text: 'Solidní přechod. Trolejbus na tebe ještě nedosáhl.' },
     { max: 34, text: 'Skoro mistr Americké. Trolejbus tě respektuje z dálky.' },
     { max: Infinity, text: 'Prošel jsi celou Americkou. Klobouk dolů, hlavu vzhůru.' }
   ];
@@ -71,7 +71,10 @@
   var bestLaneThisRun = 0;    // furthest reached across all lives this session
   var laneState = [];         // VISIBLE_ROWS entries, [0]=farthest ... [last]=nearest
   var rowEls = [];             // DOM refs, same order as laneState
-  var busy = false;            // true while a splat/respawn transition is playing
+  var busy = false;            // true while a step/splat transition is playing —
+                                // traffic freezes whenever this is true, so the
+                                // "cross one lane" motion always reads clearly
+  var STEP_MS = 360;            // must match the .cx-player.stepping animation duration
 
   function laneParamsFor(absIndex){
     var base = LANE_TYPES[(absIndex - 1) % LANE_TYPES.length];
@@ -129,10 +132,15 @@
     }
   }
 
-  function hopPlayer(){
-    playerEl.classList.remove('hop');
+  function stepUpPlayer(distancePx, cb){
+    playerEl.style.setProperty('--cx-step', distancePx + 'px');
+    playerEl.classList.remove('stepping');
     void playerEl.offsetWidth;
-    playerEl.classList.add('hop');
+    playerEl.classList.add('stepping');
+    setTimeout(function(){
+      playerEl.classList.remove('stepping');
+      cb();
+    }, STEP_MS);
   }
 
   function showSplat(params){
@@ -187,14 +195,21 @@
         if(ending) finishGame(); else respawn();
       }, 650);
     } else {
+      busy = true;
       currentLaneIndex++;
       if(currentLaneIndex > bestLaneThisRun){
         bestLaneThisRun = currentLaneIndex;
         scoreValueEl.textContent = bestLaneThisRun;
       }
-      advanceLanes();
-      hopPlayer();
-      if(ending) finishGame();
+      // traffic is frozen (see the tick() guard below) for the whole step —
+      // the character visibly rises into the lane it just cleared, then the
+      // lane content shifts and the character settles back at the sidewalk.
+      var stepDist = rowEls[rowEls.length - 1].laneEl.offsetHeight || 60;
+      stepUpPlayer(stepDist, function(){
+        advanceLanes();
+        busy = false;
+        if(ending) finishGame();
+      });
     }
   }
 
@@ -227,7 +242,7 @@
     var dt = Math.min(now - last, 1000 / 30);
     last = now;
 
-    if(active && playing && laneState.length){
+    if(active && playing && !busy && laneState.length){
       for(var i = 0; i < laneState.length; i++){
         var l = laneState[i];
         l.phase += (dt / 1000) / l.params.period;
@@ -242,7 +257,7 @@
 
   if(reduceMotion){
     // vehicles still move (the timing IS the game); reduced-motion only
-    // strips the hop/splat transition flourishes via the CSS media query.
+    // strips the step-up/splat transition flourishes via the CSS media query.
   }
 
   window.PSCrossing = {
