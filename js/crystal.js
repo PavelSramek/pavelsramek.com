@@ -675,7 +675,7 @@
 
       // damping — heavier now: settles calmer and a bit sooner
       vel.multiplyScalar(Math.pow(0.93, dt * 60));
-      angVel.multiplyScalar(Math.pow(0.9, dt * 60));
+      angVel.multiplyScalar(Math.pow(0.97, dt * 60));
 
       // speed/spin are read AFTER the wall-contact clamp and damping above,
       // not before — a die resting against a wall has just had its velocity

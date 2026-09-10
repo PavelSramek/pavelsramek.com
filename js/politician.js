@@ -49,24 +49,23 @@
     { emoji: '🍲', label: 'Oběd pro seniory' }
   ];
 
-  // 10 levels = start + 8 skutečných čelních kandidátů stran do
-  // zastupitelstva města Plzně (voby 2026, kopíruje pořadí kandidátek
-  // strana po straně) + Roman Zarzycký (ANO, primátor) jako finální,
-  // 9. boss level. Zkráceno z 15 zástupců na 8 — po jednom až dvou z
-  // každé strany, s důrazem na nejrozpoznatelnější funkce (starostové,
-  // senátor, bývalý primátor, místostarosta vlastního obvodu). index 0
-  // (Pavel Šrámek, score 0) je startovní úroveň — nikdy se pro ni
-  // nezobrazuje banner.
+  // 10 levels, upravená sestava dle uživatele (10. 9. 2026). index 0
+  // (Radek Proch, score 0) je startovní úroveň — nikdy se pro ni
+  // nezobrazuje banner. Poslední index (Roman Zarzycký, ANO) je finální
+  // boss level — viz isBossLevel()/maxConcurrent()/spawnInterval() níže,
+  // kde se pro tuhle úroveň dramaticky zvyšuje obtížnost (spam bublin).
+  // Quipy u úrovní 2–9 čekají na dodání konkrétního textu od uživatele —
+  // do té doby zůstávají prázdné (žádný quip se v milníku nezobrazí).
   var RANKS = [
-    { score: 0,    name: 'Pavel Šrámek',       party: 'Piráti' },
-    { score: 60,   name: 'Pavel Bosák',        party: 'Piráti', quip: 'Náměstek primátora. Tempo se pomalu rozjíždí.' },
-    { score: 180,  name: 'Jiří Rezek',         party: 'Piráti', quip: 'Místostarosta Plzně 1. Vědecký přístup ke všemu.' },
-    { score: 360,  name: 'Ivana Bubeníčková',  party: 'ANO',    quip: 'Starostka Plzně 1. Konkurence přituhuje.' },
-    { score: 600,  name: 'David Procházka',    party: 'ANO',    quip: 'Starosta Plzně 3. Sousední obvod nespí.' },
-    { score: 900,  name: 'Martin Baxa',        party: 'ODS',    quip: 'Bývalý primátor. Ví, jak vysoko to jde.' },
-    { score: 1260, name: 'Lumír Aschenbrenner', party: 'ODS',   quip: 'Senátor a starosta Slovan. Republiková liga.' },
-    { score: 1680, name: 'Jan Havel',          party: 'PRO PLZEŇ', quip: 'Starosta Lhoty. Poslední zastávka před finišem.' },
-    { score: 2160, name: 'Ondřej Ženíšek',     party: 'Chceme Plzeň', quip: 'Místostarosta Plzně 3. Poslední krok před magistrátem.' },
+    { score: 0,    name: 'Radek Proch',       party: 'Piráti' },
+    { score: 60,   name: 'Michal Vozobule',   party: 'Chceme Plzeň' },
+    { score: 180,  name: 'Katka Hulínská',    party: 'Piráti' },
+    { score: 360,  name: 'Libuše Hubáčková',  party: 'PRO PLZEŇ' },
+    { score: 600,  name: 'Tomáš Zalabák',     party: 'Piráti' },
+    { score: 900,  name: 'Aleš Tolar',        party: 'STAN' },
+    { score: 1260, name: 'Eva Šrámková',      party: 'Piráti' },
+    { score: 1680, name: 'Lukáš Hegner',      party: 'ODS' },
+    { score: 2160, name: 'Pavel Šrámek',      party: 'Piráti' },
     { score: 2700, name: 'Roman Zarzycký', party: 'ANO', boss: true,
       quip: '🎥 Vyhrál jsi! Běž na magistrát, buď primátor. (A natoč aspoň 3 videa denně. O všem.)' }
   ];
@@ -117,14 +116,34 @@
   var spawnCooldown = 900;
   var scoreBump = 0;
 
+  // Boss level (the last rank, Roman Zarzycký) is a deliberate difficulty
+  // spike on top of the normal curve below: every zone slot is used at
+  // once and they refill almost instantly, so the screen fills with
+  // activity far beyond what's survivable for long — "10x tolik bublin",
+  // per uživatel (10. 9. 2026). It reuses the same 4 fixed zone slots
+  // (pzZoneN/E/S/W) rather than spawning extra DOM elements.
+  function isBossLevel(){
+    return rankIndex === RANKS.length - 1;
+  }
+
   function difficultyFactor(){
     return Math.min(score / MAX_TIER_SCORE, 1);
   }
   function lerp(a, b, t){ return a + (b - a) * t; }
 
-  function spawnInterval(){ return lerp(1100, 480, difficultyFactor()); }
-  function visibleDuration(){ return lerp(1500, 680, difficultyFactor()); }
+  var BOSS_SPAWN_INTERVAL = 90;     // ms between spawn attempts — near-instant refill
+  var BOSS_VISIBLE_DURATION = 420;  // ms a bubble stays up before it's missed
+
+  function spawnInterval(){
+    if(isBossLevel()) return BOSS_SPAWN_INTERVAL;
+    return lerp(1100, 480, difficultyFactor());
+  }
+  function visibleDuration(){
+    if(isBossLevel()) return BOSS_VISIBLE_DURATION;
+    return lerp(1500, 680, difficultyFactor());
+  }
   function maxConcurrent(){
+    if(isBossLevel()) return zones.length; // every slot in play at once
     var f = difficultyFactor();
     if(f >= 0.6) return 3;
     if(f >= 0.2) return 2;
