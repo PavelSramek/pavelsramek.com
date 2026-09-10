@@ -136,11 +136,11 @@
   keyLight.position.set(4, 6, 8);
   scene.add(keyLight);
 
-  var rimLight = new THREE.PointLight(0xd95c86, 1.1, 30);
+  var rimLight = new THREE.PointLight(0xd95c86, 0.55, 30);
   rimLight.position.set(-5, -2, 4);
   scene.add(rimLight);
 
-  var orbitLight = new THREE.PointLight(0xffc93c, 1.3, 30);
+  var orbitLight = new THREE.PointLight(0xffc93c, 0.65, 30);
   scene.add(orbitLight);
 
   // ---------- texture helpers: draw one canvas "card" per die face ----------
@@ -252,10 +252,10 @@
   var materials = FACES.map(function(face){
     return new THREE.MeshPhysicalMaterial({
       map: makeFaceTexture(face),
-      roughness: 0.68,
-      metalness: 0.03,
-      clearcoat: 0.06,
-      clearcoatRoughness: 0.75
+      roughness: 0.9,
+      metalness: 0.0,
+      clearcoat: 0.0,
+      clearcoatRoughness: 0.9
     });
   });
 
@@ -325,12 +325,12 @@
   var tiltBaseline = null;
   var gravity = { x: 0, y: 0 };
   var TILT_RANGE = 26;       // degrees of tilt to reach full gravity strength
-  var GRAVITY_STRENGTH = 12; // world units / s^2 at full tilt
+  var GRAVITY_STRENGTH = 20; // world units / s^2 at full tilt
 
   // baseline "tabletop" gravity — active whenever tilt isn't, so the die
   // always has real weight and settles at the bottom of the screen instead
   // of just drifting to a stop wherever it was thrown
-  var BASE_GRAVITY = 6.5;
+  var BASE_GRAVITY = 12;
   // a heavier die: throws land softer, walls feel like a dull thud instead
   // of a bouncy ball, and everything damps out a touch quicker
   var THROW_MASS = 1.35;
@@ -455,7 +455,7 @@
   // The target orientation is computed analytically (not just "round each
   // Euler angle to the nearest 90°") so the printed text always lands the
   // right way up instead of at some arbitrary 90°/180° roll. ----------
-  var LAND_MS = 480;
+  var LAND_MS = 220;
   var landing = false;
   var landed = false;
   var landedFaceIdx = -1;
@@ -656,26 +656,26 @@
       // settle, forever re-bouncing at ~zero amplitude.
       if(pos.x > boundX){
         pos.x = boundX;
-        if(Math.abs(entryVelX) > MIN_BOUNCE_SPEED){ onBounce(Math.abs(vel.x)); vel.x *= -0.42; angVel.y += -vel.x * 0.28; triggerSquash(1, 0); landed = false; landing = false; }
+        if(Math.abs(entryVelX) > MIN_BOUNCE_SPEED){ onBounce(Math.abs(vel.x)); vel.x *= -0.28; angVel.y += -vel.x * 0.28; triggerSquash(1, 0); landed = false; landing = false; }
         else vel.x = 0;
       } else if(pos.x < -boundX){
         pos.x = -boundX;
-        if(Math.abs(entryVelX) > MIN_BOUNCE_SPEED){ onBounce(Math.abs(vel.x)); vel.x *= -0.42; angVel.y += -vel.x * 0.28; triggerSquash(1, 0); landed = false; landing = false; }
+        if(Math.abs(entryVelX) > MIN_BOUNCE_SPEED){ onBounce(Math.abs(vel.x)); vel.x *= -0.28; angVel.y += -vel.x * 0.28; triggerSquash(1, 0); landed = false; landing = false; }
         else vel.x = 0;
       }
       if(pos.y > boundY){
         pos.y = boundY;
-        if(Math.abs(entryVelY) > MIN_BOUNCE_SPEED){ onBounce(Math.abs(vel.y)); vel.y *= -0.42; angVel.x += vel.y * 0.28; triggerSquash(0, 1); landed = false; landing = false; }
+        if(Math.abs(entryVelY) > MIN_BOUNCE_SPEED){ onBounce(Math.abs(vel.y)); vel.y *= -0.28; angVel.x += vel.y * 0.28; triggerSquash(0, 1); landed = false; landing = false; }
         else vel.y = 0;
       } else if(pos.y < -boundY){
         pos.y = -boundY;
-        if(Math.abs(entryVelY) > MIN_BOUNCE_SPEED){ onBounce(Math.abs(vel.y)); vel.y *= -0.42; angVel.x += vel.y * 0.28; triggerSquash(0, 1); landed = false; landing = false; }
+        if(Math.abs(entryVelY) > MIN_BOUNCE_SPEED){ onBounce(Math.abs(vel.y)); vel.y *= -0.28; angVel.x += vel.y * 0.28; triggerSquash(0, 1); landed = false; landing = false; }
         else vel.y = 0;
       }
 
       // damping — heavier now: settles calmer and a bit sooner
-      vel.multiplyScalar(Math.pow(0.975, dt * 60));
-      angVel.multiplyScalar(Math.pow(0.978, dt * 60));
+      vel.multiplyScalar(Math.pow(0.93, dt * 60));
+      angVel.multiplyScalar(Math.pow(0.9, dt * 60));
 
       // speed/spin are read AFTER the wall-contact clamp and damping above,
       // not before — a die resting against a wall has just had its velocity
@@ -698,7 +698,7 @@
       // once it truly settles (and isn't being held tilted), start the
       // snap-to-face landing sequence instead of tumbling forever
       var tiltActive = tiltEnabled && (Math.abs(gravity.x) > 0.05 || Math.abs(gravity.y) > 0.05);
-      if(!landed && !landing && idleTimer > 0.6 && !tiltActive){
+      if(!landed && !landing && idleTimer > 0.25 && !tiltActive){
         startLanding();
       }
     }
