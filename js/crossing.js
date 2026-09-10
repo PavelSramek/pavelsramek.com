@@ -210,9 +210,24 @@
     return centerY - wrapH / 2;
   }
 
+  // Highlights the ONE lane Aleš is currently standing in (row - 1; row 0
+  // is the sidewalk, so no lane is current there) — a horizontal counterpart
+  // to the vertical .cx-corridor guide. Their intersection is the exact
+  // cell a passing vehicle has to enter to be dangerous right now, which
+  // used to be genuinely ambiguous to read at a glance: traffic in lanes
+  // above/below Aleš looks identical to traffic in his own lane.
+  function updateCurrentLaneHighlight(){
+    for(var i = 0; i < rowEls.length; i++){
+      if(rowEls[i]) rowEls[i].laneEl.classList.remove('is-current');
+    }
+    var idx = row - 1;
+    if(idx >= 0 && idx < LANES && rowEls[idx]) rowEls[idx].laneEl.classList.add('is-current');
+  }
+
   function moveToRow(newRow, cb){
     row = newRow;
     playerWrapEl.style.bottom = computePlayerBottom(row) + 'px';
+    updateCurrentLaneHighlight();
     setTimeout(cb, STEP_MS);
   }
 
@@ -223,6 +238,7 @@
     // eslint-disable-next-line no-unused-expressions
     void playerWrapEl.offsetHeight;
     playerWrapEl.style.transition = '';
+    updateCurrentLaneHighlight();
   }
 
   function renderLives(){
@@ -333,6 +349,27 @@
     }
   }
 
+  // Aleš is only ever hit at the instant he hops INTO a lane (checked in
+  // attemptCross above) — while he's standing still waiting for the next
+  // tap, nothing was checking whether a vehicle drives right through his
+  // own square in the meantime. That produced exactly the "it looked like
+  // it hit him but it didn't" moment: a car's box could visibly slide all
+  // the way over the player token, on his own row, with zero consequence,
+  // because collision was never continuous. This runs every frame while
+  // Aleš is standing in a lane (not the sidewalk, not mid-hop) and applies
+  // the same corridor-vs-vehicle-box test attemptCross uses.
+  function checkContinuousCollision(){
+    var laneIdx = row - 1;
+    if(laneIdx < 0 || laneIdx >= LANES) return;
+    var lane = laneState[laneIdx];
+    var travel = travelFor(lane);
+    var occStart = travel, occEnd = travel + lane.params.width;
+    var pStart = 50 - PLAYER_HIT_HALF, pEnd = 50 + PLAYER_HIT_HALF;
+    if(occStart < pEnd && occEnd > pStart){
+      loseLife('hit', lane.params.hits);
+    }
+  }
+
   function startRound(){
     playing = true;
     busy = false;
@@ -377,13 +414,16 @@
           if(l.phase >= 1) l.phase -= Math.floor(l.phase);
         }
         renderPositions();
+        checkContinuousCollision();
       }
-      timeLeft -= dt;
-      if(timeLeft <= 0){
-        timeLeft = 0;
-        loseLife('timeout', null);
+      if(!busy){
+        timeLeft -= dt;
+        if(timeLeft <= 0){
+          timeLeft = 0;
+          loseLife('timeout', null);
+        }
+        updateTimerUI();
       }
-      updateTimerUI();
     }
 
     requestAnimationFrame(tick);

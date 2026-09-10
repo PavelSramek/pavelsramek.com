@@ -106,6 +106,14 @@
   overflow:hidden;
 }
 .cx-lane:nth-child(even){ background-color:#3a3d47; }
+.cx-lane.is-current{
+  /* the ONE lane Aleš is actually standing in right now — horizontal
+     counterpart to .cx-corridor below. Where the two overlap is the exact
+     cell a vehicle has to enter to be dangerous this instant; traffic in
+     any other lane, even the one right next to it, can't touch him. */
+  box-shadow:inset 0 0 0 1px rgba(255,201,60,0.45);
+  background-color:rgba(255,201,60,0.07);
+}
 
 .cx-vehicle{
   position:absolute;top:50%;z-index:1;
