@@ -16,6 +16,7 @@
   var overCard = document.getElementById('pzOverCard');
   var finalScoreEl = document.getElementById('pzFinalScore');
   var finalRankEl = document.getElementById('pzFinalRank');
+  var finalQuipEl = document.getElementById('pzFinalQuip');
   var retryTap = document.getElementById('pzRetryTap');
 
   // ---------- content: the "PR-boosting" activities that fly in from all
@@ -51,25 +52,46 @@
 
   // 10 levels, upravená sestava dle uživatele (10. 9. 2026). index 0
   // (Radek Proch, score 0) je startovní úroveň — nikdy se pro ni
-  // nezobrazuje banner. Poslední index (Roman Zarzycký, ANO) je finální
-  // boss level — viz isBossLevel()/maxConcurrent()/spawnInterval() níže,
-  // kde se pro tuhle úroveň dramaticky zvyšuje obtížnost (spam bublin).
-  // Quipy u úrovní 2–9 čekají na dodání konkrétního textu od uživatele —
-  // do té doby zůstávají prázdné (žádný quip se v milníku nezobrazí).
+  // nezobrazuje vstupní banner (ale jeho quip se může objevit na obrazovce
+  // "Volební období skončilo", pokud hráč umře ještě na tomhle levelu).
+  // Poslední index (Roman Zarzycký, ANO) je finální boss level — viz
+  // isBossLevel()/maxConcurrent()/spawnInterval() níže, kde se pro tuhle
+  // úroveň dramaticky zvyšuje obtížnost (spam bublin), a viz bossBeaten()
+  // níže pro pravidlo "level 10 se musí přežít, jinak se na konci hry
+  // počítá jako dosažený jen level 9".
+  //
+  // Quipy k úrovním 2–9 dodal uživatel (CSV nahraný 10. 9. 2026,
+  // "politici_plzen_hra.csv"), dvě drobné gramatické opravy oproti
+  // originálu: u Zalabáka "šestavenaceti" → "šestadvaceti" (odpovídá
+  // uvedenému věku 26), u Tolara sjednocena osoba slovesa "natočím" →
+  // "natočí" (zbytek vět je ve 3. osobě). Quip u Zarzyckého je sloučený
+  // z jeho vlastní satirické hlášky (CSV) + původního "Vyhrál jsi!" textu,
+  // na výslovnou žádost uživatele (10. 9. 2026): obě části se zobrazují
+  // společně, ať uvidí buď.
   var RANKS = [
-    { score: 0,    name: 'Radek Proch',       party: 'Piráti' },
-    { score: 60,   name: 'Michal Vozobule',   party: 'Chceme Plzeň' },
-    { score: 180,  name: 'Katka Hulínská',    party: 'Piráti' },
-    { score: 360,  name: 'Libuše Hubáčková',  party: 'PRO PLZEŇ' },
-    { score: 600,  name: 'Tomáš Zalabák',     party: 'Piráti' },
-    { score: 900,  name: 'Aleš Tolar',        party: 'STAN' },
-    { score: 1260, name: 'Eva Šrámková',      party: 'Piráti' },
-    { score: 1680, name: 'Lukáš Hegner',      party: 'ODS' },
-    { score: 2160, name: 'Pavel Šrámek',      party: 'Piráti' },
+    { score: 0,    name: 'Radek Proch',       party: 'Piráti',
+      quip: 'Zoptimalizuje doručování politické hodnoty v agilním sprintu, i když nikdo neví, co to znamená.' },
+    { score: 60,   name: 'Michal Vozobule',   party: 'Chceme Plzeň',
+      quip: 'Namaluje v Plzni další cyklopruh dřív, než stačíš říct vysokorychlostní železnice.' },
+    { score: 180,  name: 'Katka Hulínská',    party: 'Piráti',
+      quip: 'Záchranné lano podá úplně každému – i občanovi, který se jenom klidně topil ve vlastním soukromí.' },
+    { score: 360,  name: 'Libuše Hubáčková',  party: 'PRO PLZEŇ',
+      quip: 'Zasedá v Praze, myslí na Valchu a tradiční hodnoty brání s nekompromisním úsměvem úřednice.' },
+    { score: 600,  name: 'Tomáš Zalabák',     party: 'Piráti',
+      quip: 'V šestadvaceti řídí městský bytový fond a mezi přednáškami stíhá vyfotit aspoň tři selfie.' },
+    { score: 900,  name: 'Aleš Tolar',        party: 'STAN',
+      quip: 'Napsal o Plzni tisíc novinových článků, teď o ní natočí deset tisíc kampaňových Reels.' },
+    { score: 1260, name: 'Eva Šrámková',      party: 'Piráti',
+      quip: 'Jednou rukou operuje, druhou hlasuje ve Sněmovně a nohama stíhá kampaň na Borech.' },
+    { score: 1680, name: 'Lukáš Hegner',      party: 'ODS',
+      quip: 'Zajistí, aby každé vaše PR kliknutí bylo stoprocentně modré a právně zcela nenapadnutelné.' },
+    { score: 2160, name: 'Pavel Šrámek',      party: 'Piráti',
+      quip: 'Tenhle obvod zdigitalizuje, i kdyby měl celý magistrát třikrát za sebou vypnout a zapnout.' },
     { score: 2700, name: 'Roman Zarzycký', party: 'ANO', boss: true,
-      quip: '🎥 Vyhrál jsi! Běž na magistrát, buď primátor. (A natoč aspoň 3 videa denně. O všem.)' }
+      quip: '„Pokud z otvíračky chodníku neexistuje profi video na mém TikToku, tak se to v Plzni vůbec nestalo!“ 🎥 Vyhrál jsi! Běž na magistrát, buď primátor. (A natoč aspoň 3 videa denně. O všem.)' }
   ];
   var MAX_TIER_SCORE = RANKS[RANKS.length - 1].score;
+  var BOSS_INDEX = RANKS.length - 1;
 
   var STORAGE_KEY = 'pspolitician_stats_v1';
   function loadHigh(){
@@ -115,6 +137,7 @@
   var rankIndex = 0;
   var spawnCooldown = 900;
   var scoreBump = 0;
+  var bossEnteredAt = 0; // performance.now() timestamp when rankIndex first hit BOSS_INDEX this round, 0 = not yet
 
   // Boss level (the last rank, Roman Zarzycký) is a deliberate difficulty
   // spike on top of the normal curve below: every zone slot is used at
@@ -123,7 +146,20 @@
   // per uživatel (10. 9. 2026). It reuses the same 4 fixed zone slots
   // (pzZoneN/E/S/W) rather than spawning extra DOM elements.
   function isBossLevel(){
-    return rankIndex === RANKS.length - 1;
+    return rankIndex === BOSS_INDEX;
+  }
+
+  // "Level 10 se musí přežít, jinak platí level 9" (uživatel, 10. 9. 2026):
+  // reaching the boss's score threshold only shows the entry milestone —
+  // it does NOT by itself count as having beaten the boss. The player has
+  // to survive BOSS_SURVIVE_MS after entering the boss level; only then
+  // does the "achieved level" on the game-over screen read as level 10
+  // (Zarzycký) instead of falling back to level 9 (Šrámek). This is a
+  // deliberately chosen number, not something the user specified exactly —
+  // easy to retune if 10s proves too easy/hard once tested by a human.
+  var BOSS_SURVIVE_MS = 10000;
+  function bossBeaten(){
+    return rankIndex === BOSS_INDEX && bossEnteredAt > 0 && (performance.now() - bossEnteredAt) >= BOSS_SURVIVE_MS;
   }
 
   function difficultyFactor(){
@@ -240,6 +276,7 @@
     }
     if(newIndex > rankIndex){
       rankIndex = newIndex;
+      if(rankIndex === BOSS_INDEX) bossEnteredAt = performance.now();
       renderRank();
       showMilestone(RANKS[rankIndex]);
     }
@@ -320,6 +357,7 @@
     score = 0;
     lives = 3;
     rankIndex = 0;
+    bossEnteredAt = 0;
     spawnCooldown = 700;
     scoreValueEl.textContent = 0;
     scoreBestEl.textContent = highScore;
@@ -334,8 +372,15 @@
   function gameOver(){
     playing = false;
     resetZones();
+    // Reached the boss's score threshold but died before surviving
+    // BOSS_SURVIVE_MS of it → the "achieved level" shown falls back to
+    // the previous rank (Šrámek), not Zarzycký. See bossBeaten() above.
+    var displayIndex = (rankIndex === BOSS_INDEX && !bossBeaten()) ? BOSS_INDEX - 1 : rankIndex;
+    var dispRank = RANKS[displayIndex];
     finalScoreEl.textContent = score;
-    finalRankEl.textContent = 'dosažená úroveň: ' + levelLabel(rankIndex) + ' · ' + RANKS[rankIndex].name + ' (' + RANKS[rankIndex].party + ')';
+    finalRankEl.textContent = 'dosažená úroveň: ' + levelLabel(displayIndex) + ' · ' + dispRank.name + ' (' + dispRank.party + ')';
+    finalQuipEl.textContent = dispRank.quip || '';
+    finalQuipEl.classList.toggle('is-hidden', !dispRank.quip);
     overCard.classList.remove('hidden');
   }
 
