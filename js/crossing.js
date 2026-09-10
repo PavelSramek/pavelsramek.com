@@ -12,6 +12,16 @@
   var playerWrapEl = document.getElementById('cxPlayerWrap');
   var splatEl = document.getElementById('cxSplat');
   var splatCapEl = document.getElementById('cxSplatCap');
+  // the splat lives in the markup nested inside .cx-player-wrap (so it can
+  // read as "at Aleš"), but that wrap has its own translateX transform —
+  // which makes any position:fixed descendant anchor to IT, not the
+  // viewport. Move the splat out to the stage root so its `position:fixed`
+  // in CSS truly centers on screen and its multi-line caption can never
+  // get clipped by the (now much smaller) player token or the board edge.
+  var stageEl = document.querySelector('.cx-stage');
+  if(stageEl && splatEl && splatEl.parentNode !== stageEl){
+    stageEl.appendChild(splatEl);
+  }
   var tapZoneEl = document.getElementById('cxTapZone');
   var startCard = document.getElementById('cxStartCard');
   var startTap = document.getElementById('cxStartTap');
@@ -90,6 +100,7 @@
   var rowEls = [];             // DOM refs, keyed by logical lane index (0..LANES-1)
   var homeSlotEls = [];
   var slotsFilled = 0;
+  var awaitingContinue = false; // true while the death splat is up, waiting for a tap
 
   function laneParamsFor(i){
     var base = LANE_TYPES[i];
@@ -164,9 +175,21 @@
   }
 
   function computePlayerBottom(r){
-    if(r <= 0) return sidewalkEl.offsetHeight / 2;
-    var rowH = rowEls[0].laneEl.offsetHeight || 40;
-    return sidewalkEl.offsetHeight + (r - 1) * rowH + rowH / 2;
+    // centerY = the vertical midpoint of the row Aleš is standing on
+    // (sidewalk for r<=0, otherwise lane r). "bottom" positions the
+    // wrap's own bottom edge, so we then pull back by half the wrap's
+    // rendered height — otherwise the wrap grows entirely upward from
+    // that midpoint and its top (Aleš's head) overflows into the lane
+    // above, even though his feet read as being in the right lane.
+    var centerY;
+    if(r <= 0){
+      centerY = sidewalkEl.offsetHeight / 2;
+    } else {
+      var rowH = rowEls[0].laneEl.offsetHeight || 40;
+      centerY = sidewalkEl.offsetHeight + (r - 1) * rowH + rowH / 2;
+    }
+    var wrapH = playerWrapEl.offsetHeight || 0;
+    return centerY - wrapH / 2;
   }
 
   function moveToRow(newRow, cb){
@@ -198,7 +221,12 @@
   }
 
   function showSplat(msg){
-    splatCapEl.textContent = msg;
+    splatCapEl.innerHTML = '';
+    splatCapEl.appendChild(document.createTextNode(msg));
+    var hint = document.createElement('span');
+    hint.className = 'hint';
+    hint.textContent = 'klepni pro další pokus';
+    splatCapEl.appendChild(hint);
     splatEl.classList.add('show');
   }
   function hideSplat(){
@@ -231,16 +259,22 @@
       ? hits[Math.floor(Math.random() * hits.length)]
       : TIMEOUT_CAPTIONS[Math.floor(Math.random() * TIMEOUT_CAPTIONS.length)];
     showSplat(msg);
-    setTimeout(function(){
-      hideSplat();
-      if(lives <= 0){
-        finishGame();
-      } else {
-        timeLeft = TIME_LIMIT_MS;
-        updateTimerUI();
-        moveToRow(0, function(){ busy = false; });
-      }
-    }, 650);
+    awaitingContinue = true;
+  }
+
+  // fires on the tap that dismisses the death splat — that same tap both
+  // clears the message and kicks off the next attempt (or the game-over
+  // screen, on the final life), so there's no fixed delay to wait out.
+  function continueAfterSplat(){
+    awaitingContinue = false;
+    hideSplat();
+    if(lives <= 0){
+      finishGame();
+    } else {
+      timeLeft = TIME_LIMIT_MS;
+      updateTimerUI();
+      moveToRow(0, function(){ busy = false; });
+    }
   }
 
   function finishGame(){
@@ -285,6 +319,7 @@
   function startRound(){
     playing = true;
     busy = false;
+    awaitingContinue = false;
     lives = LIVES_START;
     round = 1;
     score = 0;
@@ -306,6 +341,7 @@
   retryTap.addEventListener('click', startRound);
   tapZoneEl.addEventListener('pointerdown', function(e){
     e.preventDefault();
+    if(awaitingContinue){ continueAfterSplat(); return; }
     attemptCross();
   });
 

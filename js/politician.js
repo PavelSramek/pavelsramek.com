@@ -49,31 +49,25 @@
     { emoji: '🍲', label: 'Oběd pro seniory' }
   ];
 
-  // 17 levels = start + 15 skutečných čelních kandidátů stran do
+  // 10 levels = start + 8 skutečných čelních kandidátů stran do
   // zastupitelstva města Plzně (voby 2026, kopíruje pořadí kandidátek
   // strana po straně) + Roman Zarzycký (ANO, primátor) jako finální,
-  // 16. boss level. Zkráceno z původních 50 na 15 zástupců napříč všemi
-  // stranami — vybráni tak, aby si hráč "prošel" každou stranu, ne aby
-  // musel proklikat celou kandidátku. index 0 (Pavel Šrámek, score 0) je
-  // startovní úroveň — nikdy se pro ni nezobrazuje banner.
+  // 9. boss level. Zkráceno z 15 zástupců na 8 — po jednom až dvou z
+  // každé strany, s důrazem na nejrozpoznatelnější funkce (starostové,
+  // senátor, bývalý primátor, místostarosta vlastního obvodu). index 0
+  // (Pavel Šrámek, score 0) je startovní úroveň — nikdy se pro ni
+  // nezobrazuje banner.
   var RANKS = [
     { score: 0,    name: 'Pavel Šrámek',       party: 'Piráti' },
     { score: 60,   name: 'Pavel Bosák',        party: 'Piráti', quip: 'Náměstek primátora. Tempo se pomalu rozjíždí.' },
     { score: 180,  name: 'Jiří Rezek',         party: 'Piráti', quip: 'Místostarosta Plzně 1. Vědecký přístup ke všemu.' },
-    { score: 360,  name: 'Tomáš Zalabák',      party: 'Piráti', quip: 'Kandidát na starostu Plzně 2 - Slovany. Tempo houstne.' },
-    { score: 600,  name: 'Martin Holzman',     party: 'Piráti', quip: 'Radní Plzně 1. Studuje i mezi kliknutími.' },
-    { score: 900,  name: 'Ivana Bubeníčková',  party: 'ANO',    quip: 'Starostka Plzně 1. Konkurence přituhuje.' },
-    { score: 1260, name: 'David Procházka',    party: 'ANO',    quip: 'Starosta Plzně 3. Sousední obvod nespí.' },
-    { score: 1680, name: 'Tomáš Soukup',       party: 'ANO',    quip: 'Starosta Plzně 4. Tempo dál roste.' },
-    { score: 2160, name: 'Michal Hausner',     party: 'ANO',    quip: 'Starosta Plzně 6 a dobrovolný hasič. Reflexy na místě.' },
-    { score: 2700, name: 'Lukáš Hegner',       party: 'ODS',    quip: 'Advokát a zastupitel. Detaily rozhodují.' },
-    { score: 3300, name: 'Martin Baxa',        party: 'ODS',    quip: 'Bývalý primátor. Ví, jak vysoko to jde.' },
-    { score: 3960, name: 'Lumír Aschenbrenner', party: 'ODS',   quip: 'Senátor a starosta Slovan. Republiková liga.' },
-    { score: 4680, name: 'Roman Andrlík',      party: 'PRO PLZEŇ', quip: 'Místostarosta Slovan. Přes půlku hotovo.' },
-    { score: 5460, name: 'Jan Havel',          party: 'PRO PLZEŇ', quip: 'Starosta Lhoty. Tempo dál houstne.' },
-    { score: 6300, name: 'Ladislav Nový',      party: 'Chceme Plzeň', quip: 'Místostarosta Plzně 3. Soused ve vlastním obvodu.' },
-    { score: 7200, name: 'Ondřej Ženíšek',     party: 'Chceme Plzeň', quip: 'Místostarosta Plzně 3. Poslední zastávka před finišem.' },
-    { score: 8160, name: 'Roman Zarzycký', party: 'ANO', boss: true,
+    { score: 360,  name: 'Ivana Bubeníčková',  party: 'ANO',    quip: 'Starostka Plzně 1. Konkurence přituhuje.' },
+    { score: 600,  name: 'David Procházka',    party: 'ANO',    quip: 'Starosta Plzně 3. Sousední obvod nespí.' },
+    { score: 900,  name: 'Martin Baxa',        party: 'ODS',    quip: 'Bývalý primátor. Ví, jak vysoko to jde.' },
+    { score: 1260, name: 'Lumír Aschenbrenner', party: 'ODS',   quip: 'Senátor a starosta Slovan. Republiková liga.' },
+    { score: 1680, name: 'Jan Havel',          party: 'PRO PLZEŇ', quip: 'Starosta Lhoty. Poslední zastávka před finišem.' },
+    { score: 2160, name: 'Ondřej Ženíšek',     party: 'Chceme Plzeň', quip: 'Místostarosta Plzně 3. Poslední krok před magistrátem.' },
+    { score: 2700, name: 'Roman Zarzycký', party: 'ANO', boss: true,
       quip: '🎥 Vyhrál jsi! Běž na magistrát, buď primátor. (A natoč aspoň 3 videa denně. O všem.)' }
   ];
   var MAX_TIER_SCORE = RANKS[RANKS.length - 1].score;
