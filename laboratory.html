@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="css/crystal.css">
 <link rel="stylesheet" href="css/curve.css">
 <link rel="stylesheet" href="css/politician.css">
+<link rel="stylesheet" href="css/crossing.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
@@ -106,11 +107,48 @@
   </div>
 </div>
 
+<div id="crossingRoot" class="game-hidden">
+  <div class="cx-stage">
+    <div class="cx-hud">
+      <div class="title">Tapy</div>
+      <div class="taps"><span id="cxTaps">0</span>/50</div>
+    </div>
+    <div class="cx-score-box">
+      <div class="title">Skóre</div>
+      <div class="value" id="cxScoreValue">0</div>
+      <div class="best">nejlepší: <span id="cxScoreBest">0</span></div>
+    </div>
+    <div class="cx-field" id="cxField">
+      <div class="cx-road" id="cxRoad"></div>
+      <div class="cx-sidewalk" id="cxSidewalk">
+        <div class="cx-player" id="cxPlayer">🚶</div>
+        <div class="cx-splat" id="cxSplat"><div class="blob"></div><div class="cap" id="cxSplatCap"></div></div>
+      </div>
+    </div>
+    <div class="cx-tapzone" id="cxTapZone"></div>
+    <div class="cx-startcard" id="cxStartCard">
+      <div class="wow">Průjezd Americkou</div>
+      <h1>Sdílená zóna. Bezpečná? Uvidíme.</h1>
+      <p>Aleš jen chce přejít na druhou stranu. Jedno ťuknutí = jeden pruh dopředu. Timing rozhoduje. Máš 50 ťuknutí.</p>
+      <div class="legend"><span>👵 paní s holí</span><span>🧑‍🦽 pán na vozíku</span><span>🚗 veterán</span><span>🚐 MPV</span><span>🚌 autobus</span><span>🏎️ sporťák</span><span>🚎 trolejbus</span></div>
+      <div class="tap" id="cxStartTap">Klepni a přejdi</div>
+    </div>
+    <div class="cx-overcard hidden" id="cxOverCard">
+      <h1>Konec směny</h1>
+      <div class="final" id="cxFinalScore">0</div>
+      <div class="rank-final" id="cxFinalCaption"></div>
+      <p>Sdílená zóna funguje. Většinou.</p>
+      <div class="tap" id="cxRetryTap">Zkusit znovu</div>
+    </div>
+  </div>
+</div>
+
 <div id="corner">vlastní 3D scéna &middot; <b>WebGL</b></div>
 
 <script src="js/crystal.js"></script>
 <script src="js/curve.js"></script>
 <script src="js/politician.js"></script>
+<script src="js/crossing.js"></script>
 <script src="js/game-switch.js"></script>
 </body>
 </html>

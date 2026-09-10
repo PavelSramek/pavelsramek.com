@@ -1,0 +1,166 @@
+/* "Průjezd Americkou" — loaded alongside crystal.css, which already
+   defines :root palette, html/body basics, #backlink, #corner and the
+   shared .game-hidden / .game-switch toggle rules. Only game-specific
+   classes live here, all prefixed cx- to avoid clashing with the other
+   games on the same page. */
+
+.cx-stage{
+  position:fixed;inset:0;z-index:1;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+
+.cx-hud{
+  position:fixed;bottom:22px;left:22px;z-index:5;
+  font-family:'SF Mono','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+  font-size:.72rem;letter-spacing:.03em;color:var(--muted);
+  display:flex;flex-direction:column;gap:3px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:10px;padding:12px 14px;
+  backdrop-filter:blur(6px);
+  min-width:130px;
+}
+.cx-hud .title{color:#fff;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.66rem;margin-bottom:4px;opacity:.8;}
+.cx-hud .taps{font-family:'SF Mono','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;color:var(--gold);font-weight:600;}
+
+.cx-score-box{
+  position:fixed;top:22px;right:26px;z-index:5;
+  text-align:right;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:10px;padding:12px 16px;
+  backdrop-filter:blur(6px);
+  min-width:140px;
+}
+.cx-score-box .title{color:var(--muted);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.62rem;margin-bottom:6px;}
+.cx-score-box .value{
+  font-family:'SF Mono','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+  font-size:1.7rem;font-weight:700;color:var(--gold);line-height:1;
+}
+.cx-score-box .best{
+  font-family:'SF Mono','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+  font-size:.68rem;color:var(--muted);margin-top:4px;
+}
+
+.cx-field{
+  position:relative;
+  width:min(92vw, 420px);
+  display:flex;flex-direction:column;
+  border-radius:18px;overflow:hidden;
+  box-shadow:0 24px 60px -20px rgba(0,0,0,0.6);
+  border:1px solid rgba(255,255,255,0.08);
+}
+
+.cx-road{
+  display:flex;flex-direction:column;
+}
+
+.cx-lane{
+  position:relative;
+  height:clamp(52px, 12vh, 66px);
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.35) 0 18px, transparent 18px 34px) center / 100% 3px no-repeat,
+    #33363f;
+  border-bottom:1px solid rgba(0,0,0,0.25);
+  overflow:hidden;
+}
+.cx-lane:nth-child(even){ background-color:#3a3d47; }
+
+.cx-vehicle{
+  position:absolute;top:50%;
+  transform:translateY(-50%);
+  height:70%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:clamp(1.4rem, 5vw, 1.9rem);
+  filter:drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+  white-space:nowrap;
+}
+
+.cx-sidewalk{
+  position:relative;
+  height:clamp(58px, 13vh, 74px);
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.12) 0 10px, transparent 10px 20px),
+    #c9c2b4;
+  display:flex;align-items:center;justify-content:center;
+}
+
+.cx-player{
+  font-size:clamp(1.7rem, 6vw, 2.3rem);
+  transition:transform .15s ease;
+}
+.cx-player.hop{animation:cx-hop .28s ease;}
+@keyframes cx-hop{
+  0%{ transform:translateY(0) scale(1); }
+  40%{ transform:translateY(-14px) scale(1.08); }
+  100%{ transform:translateY(0) scale(1); }
+}
+
+.cx-splat{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;
+  opacity:0;pointer-events:none;
+  transition:opacity .15s ease;
+  text-align:center;padding:0 10px;
+}
+.cx-splat.show{opacity:1;}
+.cx-splat .blob{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(circle at 38% 55%, rgba(150,10,20,0.88) 0 16%, transparent 60%),
+    radial-gradient(circle at 60% 40%, rgba(120,8,16,0.85) 0 14%, transparent 58%),
+    radial-gradient(circle at 50% 65%, rgba(90,6,12,0.8) 0 20%, transparent 62%);
+}
+.cx-splat .cap{
+  position:relative;z-index:1;
+  font-weight:700;font-size:.82rem;color:#fff;
+  text-shadow:0 2px 6px rgba(0,0,0,0.7);
+  max-width:280px;line-height:1.35;
+}
+
+.cx-tapzone{
+  position:fixed;inset:0;z-index:2;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
+}
+
+.cx-startcard, .cx-overcard{
+  position:fixed;inset:0;z-index:8;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;text-align:center;padding:0 30px;
+  background:rgba(11,14,22,0.82);
+  transition:opacity .3s ease;
+}
+.cx-startcard.hidden, .cx-overcard.hidden{opacity:0;pointer-events:none;}
+.cx-startcard h1, .cx-overcard h1{font-size:1.2rem;margin:0;}
+.cx-startcard .wow{
+  font-size:.72rem;letter-spacing:.08em;color:var(--gold);font-weight:700;
+  text-transform:uppercase;margin-bottom:2px;
+}
+.cx-startcard p, .cx-overcard p{color:var(--muted);font-size:.85rem;margin:0;max-width:320px;line-height:1.5;}
+.cx-startcard .legend{
+  display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:320px;margin-top:4px;
+}
+.cx-startcard .legend span{
+  font-size:.72rem;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+  border-radius:999px;padding:4px 9px;
+}
+.cx-startcard .tap, .cx-overcard .tap{
+  margin-top:14px;font-weight:700;letter-spacing:.03em;font-size:.92rem;
+  padding:13px 28px;border-radius:999px;cursor:pointer;
+  background:linear-gradient(135deg, var(--purple), var(--pink));
+}
+.cx-overcard .final{
+  font-family:'SF Mono','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+  font-size:2.1rem;font-weight:700;color:var(--gold);
+}
+.cx-overcard .rank-final{font-size:.85rem;color:#fff;font-weight:600;margin-top:-4px;max-width:300px;}
+
+@media (max-width:420px){
+  .cx-hud, .cx-score-box{min-width:110px;padding:10px 12px;}
+}
+
+@media (prefers-reduced-motion: reduce){
+  .cx-player, .cx-splat, .cx-startcard, .cx-overcard{transition:none;animation:none;}
+}
