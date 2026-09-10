@@ -42,9 +42,7 @@
   <canvas id="trail"></canvas>
   <canvas id="heads"></canvas>
   <div id="scoreboard">
-    <span class="p1score" id="scoreP1">0</span>
-    <span class="sep">:</span>
-    <span class="p2score" id="scoreP2">0</span>
+    <span id="scoreList"></span>
     <span class="round">kolo <span id="roundNum">1</span></span>
   </div>
   <div class="ctrl-cluster p1">
@@ -55,9 +53,14 @@
     <button class="ctrl-btn left">&#9664;</button>
     <button class="ctrl-btn right">&#9654;</button>
   </div>
+  <div id="curvePlayers">
+    <div id="curvePlayersList"></div>
+    <button id="curveAddPlayer" class="add-player-btn" type="button">+ Přidat hráče</button>
+  </div>
   <div id="startHint">
     <h1>Zatáčka</h1>
     <p>404 &middot; tahle stránka taky neexistuje, ale je tu hra pro dva. Telefon polož mezi vás na stůl: každý ovládá svoje šipky ze svojí strany.</p>
+    <p class="desktop-hint">Na počítači hraješ klávesami nebo myší, ovládání dalších hráčů najdeš dole vlevo.</p>
     <div class="tap">Klepni a hraj</div>
   </div>
   <div id="banner">

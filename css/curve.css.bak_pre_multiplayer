@@ -24,7 +24,9 @@ body{
   font-size:.78rem;letter-spacing:.02em;
   pointer-events:none;
 }
-#scoreList .sep{color:var(--muted);margin:0 2px;}
+#scoreboard .p1score{color:var(--pink);font-weight:700;}
+#scoreboard .p2score{color:var(--gold);font-weight:700;}
+#scoreboard .sep{color:var(--muted);}
 #scoreboard .round{color:var(--muted);margin-left:6px;}
 
 .ctrl-cluster{
@@ -48,41 +50,6 @@ body{
 .p1 .ctrl-btn{background:rgba(217,92,134,0.22);border:2px solid rgba(217,92,134,0.55);}
 .p2 .ctrl-btn{background:rgba(255,201,60,0.22);border:2px solid rgba(255,201,60,0.55);}
 .ctrl-btn.active{filter:brightness(1.5);transform:scale(0.92);}
-
-/* desktop (mouse/keyboard) roster + "add player" panel — hidden entirely
-   on touch devices, where the on-screen buttons above are used instead */
-#curvePlayers{
-  display:none;
-  position:fixed;bottom:22px;left:22px;z-index:10;
-  font-family:'SF Mono','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
-  font-size:.72rem;letter-spacing:.02em;color:var(--muted);
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.1);
-  border-radius:12px;padding:11px 13px;
-  backdrop-filter:blur(6px);
-  min-width:168px;
-  flex-direction:column;gap:7px;
-}
-#curveRoot.ps-desktop .ctrl-cluster{display:none;}
-#curveRoot.ps-desktop #curvePlayers{display:flex;}
-#curvePlayersList{display:flex;flex-direction:column;gap:4px;}
-.curve-player-row{display:flex;align-items:center;gap:7px;color:#fff;}
-.curve-player-row .dot{width:9px;height:9px;border-radius:50%;flex:none;}
-.add-player-btn{
-  margin-top:2px;
-  font-family:inherit;font-size:.72rem;font-weight:600;letter-spacing:.02em;
-  color:#fff;border:none;border-radius:999px;cursor:pointer;
-  padding:9px 12px;
-  background:linear-gradient(135deg, var(--purple), var(--pink));
-  transition:transform .1s ease, opacity .1s ease;
-}
-.add-player-btn:active{transform:scale(0.96);}
-.add-player-btn:disabled{opacity:.45;cursor:default;background:rgba(255,255,255,0.12);}
-
-#startHint .desktop-hint{display:none;}
-#curveRoot.ps-desktop #startHint .desktop-hint{
-  display:block;color:var(--muted);font-size:.85rem;margin:2px 0 0;max-width:300px;line-height:1.5;
-}
 
 #startHint{
   position:fixed;inset:0;z-index:8;
