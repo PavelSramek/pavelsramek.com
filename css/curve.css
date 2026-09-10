@@ -2,7 +2,13 @@
    defines :root palette, html/body basics, #backlink and #corner.
    Only curve-specific classes plus the two-game toggle live here. */
 
-body{touch-action:none;overscroll-behavior:none;}
+/* held-down controls (Zatáčka's turn buttons especially) must never trigger
+   the mobile "select this text" / magnifier loupe gesture on a long press */
+body{
+  touch-action:none;overscroll-behavior:none;
+  -webkit-user-select:none;user-select:none;
+  -webkit-touch-callout:none;
+}
 
 #trail{position:fixed;inset:0;z-index:1;}
 #heads{position:fixed;inset:0;z-index:2;}

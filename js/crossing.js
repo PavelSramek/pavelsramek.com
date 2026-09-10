@@ -1,11 +1,15 @@
 (function(){
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  var tapsEl = document.getElementById('cxTaps');
+  var livesEl = document.getElementById('cxLives');
+  var timerFillEl = document.getElementById('cxTimerFill');
   var scoreValueEl = document.getElementById('cxScoreValue');
   var scoreBestEl = document.getElementById('cxScoreBest');
+  var roundLabelEl = document.getElementById('cxRoundLabel');
+  var homeEl = document.getElementById('cxHome');
   var roadEl = document.getElementById('cxRoad');
-  var playerEl = document.getElementById('cxPlayer');
+  var sidewalkEl = document.getElementById('cxSidewalk');
+  var playerWrapEl = document.getElementById('cxPlayerWrap');
   var splatEl = document.getElementById('cxSplat');
   var splatCapEl = document.getElementById('cxSplatCap');
   var tapZoneEl = document.getElementById('cxTapZone');
@@ -16,13 +20,11 @@
   var finalCaptionEl = document.getElementById('cxFinalCaption');
   var retryTap = document.getElementById('cxRetryTap');
 
-  var MAX_TAPS = 50;
-  var VISIBLE_ROWS = 5;
-
-  // Aleš jen chce přejít na druhou stranu Americké. Nic víc. Sdílená zóna
-  // znamená, že v jednom pruhu je klidně paní s holí, ve druhém trolejbus —
-  // to je celý vtip. Kategorie jsou seřazené od nejpomalejší po nejrychlejší
-  // a cyklí se dál s tím, že se s každým kolem zrychlují.
+  // Aleš jen chce přejít Americkou, klidně vícekrát za směnu. Klasický
+  // Frogger: pevná deska pruhů (ne nekonečné rolování), životy, časomíra
+  // na pokus a řada "domečků" nahoře, které se postupně obsazují. Kategorie
+  // jsou seřazené od nejpomalejší (dole, u chodníku) po nejrychlejší
+  // (nahoře, u cíle) — to je celý vtip sdílené zóny.
   var LANE_TYPES = [
     { emoji: '👵', label: 'paní s holí', period: 3.2, width: 12,
       hits: ['Praštila tě holí. I důchod umí zrychlit.', 'Zastavila tě pohledem. A pak holí.'] },
@@ -40,16 +42,20 @@
       hits: ['Trolejbus. Elektrika vždy vyhraje.', 'Tiše, rychle, definitivně.'] }
   ];
 
-  var FINAL_CAPTIONS = [
-    { max: 2,  text: 'Ani se ti nepodařilo pořádně vykročit.' },
-    { max: 6,  text: 'Paní s holí tě sejmula hned na začátku. Bezpečná zóna, jasně.' },
-    { max: 13, text: 'Prošel jsi kolem obyčejného provozu. Sdílená zóna, žádná panika.' },
-    { max: 21, text: 'Solidní přechod. Trolejbus na tebe ještě nedosáhl.' },
-    { max: 34, text: 'Skoro mistr Americké. Trolejbus tě respektuje z dálky.' },
-    { max: Infinity, text: 'Prošel jsi celou Americkou. Klobouk dolů, hlavu vzhůru.' }
+  var TIMEOUT_CAPTIONS = [
+    'Stál jsi tam moc dlouho. Sdílená zóna nečeká.',
+    'Čas vypršel. Doprava má přednost, i před váháním.'
   ];
 
-  var STORAGE_KEY = 'pscrossing_stats_v1';
+  var FINAL_CAPTIONS = [
+    { max: 1, text: 'Ani jedno kolo. Paní s holí měla navrch.' },
+    { max: 2, text: 'Jedno kolo za sebou. Slušný start.' },
+    { max: 3, text: 'Solidní výkon. Trolejbus tě ještě nerespektuje.' },
+    { max: 5, text: 'Zkušený chodec Americké. Klobouk dolů.' },
+    { max: Infinity, text: 'Mistr sdílené zóny. Radnice by tě měla najmout.' }
+  ];
+
+  var STORAGE_KEY = 'pscrossing_stats_v2';
   function loadHigh(){
     try{
       var raw = localStorage.getItem(STORAGE_KEY);
@@ -64,168 +70,236 @@
   var highScore = loadHigh();
   scoreBestEl.textContent = highScore;
 
+  var LANES = LANE_TYPES.length;   // fixed board: 7 lanes, index 0 = nearest start (easiest) ... LANES-1 = nearest home (hardest)
+  var HOME_SLOTS = 5;
+  var LIVES_START = 3;
+  var TIME_LIMIT_MS = 30000;
+  var STEP_MS = 360;                // must match the .cx-player-wrap "bottom" transition duration
+
   var active = true;    // host-controlled pause, same convention as the other games
   var playing = false;
-  var tapsUsed = 0;
-  var currentLaneIndex = 0;   // lanes successfully crossed in the current life
-  var bestLaneThisRun = 0;    // furthest reached across all lives this session
-  var laneState = [];         // VISIBLE_ROWS entries, [0]=farthest ... [last]=nearest
-  var rowEls = [];             // DOM refs, same order as laneState
-  var busy = false;            // true while a step/splat transition is playing —
-                                // traffic freezes whenever this is true, so the
-                                // "cross one lane" motion always reads clearly
-  var STEP_MS = 360;            // must match the .cx-player.stepping animation duration
+  var lives = LIVES_START;
+  var round = 1;
+  var score = 0;
+  var row = 0;                 // 0 = at the sidewalk (start); LANES = reached the home strip
+  var timeLeft = TIME_LIMIT_MS;
+  var busy = false;            // true while a step/splat/respawn transition is playing —
+                                // traffic freezes whenever this is true, same as the timer,
+                                // so the "cross one lane" motion always reads clearly
+  var laneState = [];          // LANES entries
+  var rowEls = [];             // DOM refs, keyed by logical lane index (0..LANES-1)
+  var homeSlotEls = [];
+  var slotsFilled = 0;
 
-  function laneParamsFor(absIndex){
-    var base = LANE_TYPES[(absIndex - 1) % LANE_TYPES.length];
-    var cycle = Math.floor((absIndex - 1) / LANE_TYPES.length);
+  function laneParamsFor(i){
+    var base = LANE_TYPES[i];
+    var cycle = round - 1;
     var speedMul = Math.pow(0.88, cycle);
-    var period = Math.max(0.32, base.period * speedMul);
+    var period = Math.max(0.28, base.period * speedMul);
     var width = Math.min(46, base.width + cycle * 2);
     return { emoji: base.emoji, label: base.label, period: period, width: width, hits: base.hits };
   }
 
-  function freshLane(absIndex){
-    return { absIndex: absIndex, params: laneParamsFor(absIndex), phase: Math.random() };
-  }
-
-  // build the DOM rows once; content gets rewritten as lanes shift
-  for(var i = 0; i < VISIBLE_ROWS; i++){
+  // build the DOM rows once — top of the column is the hardest lane
+  // (nearest home), bottom is the easiest (nearest the sidewalk).
+  for(var bi = LANES - 1; bi >= 0; bi--){
     var laneEl = document.createElement('div');
     laneEl.className = 'cx-lane';
     var vEl = document.createElement('div');
     vEl.className = 'cx-vehicle';
     laneEl.appendChild(vEl);
     roadEl.appendChild(laneEl);
-    rowEls.push({ laneEl: laneEl, vehicleEl: vEl });
+    rowEls[bi] = { laneEl: laneEl, vehicleEl: vEl };
   }
 
-  function rebuildLanes(){
-    laneState = [];
-    for(var k = VISIBLE_ROWS; k >= 1; k--){
-      laneState.push(freshLane(currentLaneIndex + k));
+  for(var hs = 0; hs < HOME_SLOTS; hs++){
+    var slotEl = document.createElement('div');
+    slotEl.className = 'cx-home-slot';
+    homeEl.appendChild(slotEl);
+    homeSlotEls.push(slotEl);
+  }
+
+  function resetHomeSlots(){
+    slotsFilled = 0;
+    for(var i = 0; i < homeSlotEls.length; i++){
+      homeSlotEls[i].classList.remove('filled');
+      homeSlotEls[i].textContent = '';
     }
-    renderLaneContent();
-    renderPositions();
   }
 
-  function advanceLanes(){
-    laneState.pop();
-    laneState.unshift(freshLane(currentLaneIndex + VISIBLE_ROWS));
+  function fillNextHomeSlot(){
+    if(slotsFilled < homeSlotEls.length){
+      homeSlotEls[slotsFilled].classList.add('filled');
+      homeSlotEls[slotsFilled].textContent = '✓';
+      slotsFilled++;
+    }
+  }
+
+  function buildLanesForRound(){
+    for(var i = 0; i < LANES; i++){
+      laneState[i] = { params: laneParamsFor(i), phase: Math.random(), dir: (i % 2 === 0) ? 1 : -1 };
+    }
     renderLaneContent();
     renderPositions();
   }
 
   function renderLaneContent(){
-    for(var i = 0; i < VISIBLE_ROWS; i++){
-      var params = laneState[i].params;
-      rowEls[i].vehicleEl.textContent = params.emoji;
-      rowEls[i].vehicleEl.style.width = params.width + '%';
+    for(var i = 0; i < LANES; i++){
+      var s = laneState[i];
+      rowEls[i].vehicleEl.textContent = s.params.emoji;
+      rowEls[i].vehicleEl.style.width = s.params.width + '%';
+      rowEls[i].vehicleEl.classList.toggle('rev', s.dir === -1);
     }
+  }
+
+  function travelFor(lane){
+    var w = lane.params.width;
+    return lane.dir === 1 ? (lane.phase * (100 + w) - w) : ((1 - lane.phase) * (100 + w) - w);
   }
 
   function renderPositions(){
-    for(var i = 0; i < VISIBLE_ROWS; i++){
-      var l = laneState[i];
-      var travel = l.phase * (100 + l.params.width) - l.params.width;
-      rowEls[i].vehicleEl.style.left = travel + '%';
+    for(var i = 0; i < LANES; i++){
+      rowEls[i].vehicleEl.style.left = travelFor(laneState[i]) + '%';
     }
   }
 
-  function stepUpPlayer(distancePx, cb){
-    playerEl.style.setProperty('--cx-step', distancePx + 'px');
-    playerEl.classList.remove('stepping');
-    void playerEl.offsetWidth;
-    playerEl.classList.add('stepping');
-    setTimeout(function(){
-      playerEl.classList.remove('stepping');
-      cb();
-    }, STEP_MS);
+  function computePlayerBottom(r){
+    if(r <= 0) return sidewalkEl.offsetHeight / 2;
+    var rowH = rowEls[0].laneEl.offsetHeight || 40;
+    return sidewalkEl.offsetHeight + (r - 1) * rowH + rowH / 2;
   }
 
-  function showSplat(params){
-    var msg = params.hits[Math.floor(Math.random() * params.hits.length)];
+  function moveToRow(newRow, cb){
+    row = newRow;
+    playerWrapEl.style.bottom = computePlayerBottom(row) + 'px';
+    setTimeout(cb, STEP_MS);
+  }
+
+  function snapToStart(){
+    row = 0;
+    playerWrapEl.style.transition = 'none';
+    playerWrapEl.style.bottom = computePlayerBottom(0) + 'px';
+    // eslint-disable-next-line no-unused-expressions
+    void playerWrapEl.offsetHeight;
+    playerWrapEl.style.transition = '';
+  }
+
+  function renderLives(){
+    var s = '';
+    for(var i = 0; i < lives; i++) s += '❤️';
+    livesEl.textContent = s || '💀';
+  }
+
+  function updateTimerUI(){
+    var pct = Math.max(0, (timeLeft / TIME_LIMIT_MS) * 100);
+    timerFillEl.style.width = pct + '%';
+    timerFillEl.classList.toggle('warn', pct <= 40 && pct > 15);
+    timerFillEl.classList.toggle('danger', pct <= 15);
+  }
+
+  function showSplat(msg){
     splatCapEl.textContent = msg;
     splatEl.classList.add('show');
   }
-
   function hideSplat(){
     splatEl.classList.remove('show');
   }
 
-  function respawn(){
-    hideSplat();
-    currentLaneIndex = 0;
-    rebuildLanes();
-    busy = false;
+  function onReachHome(){
+    var bonus = 50 + Math.round(timeLeft / 1000) * 5;
+    score += bonus;
+    scoreValueEl.textContent = score;
+    fillNextHomeSlot();
+    if(slotsFilled >= HOME_SLOTS){
+      score += 100;
+      scoreValueEl.textContent = score;
+      round++;
+      roundLabelEl.textContent = 'kolo ' + round;
+      resetHomeSlots();
+      buildLanesForRound();
+    }
+    timeLeft = TIME_LIMIT_MS;
+    updateTimerUI();
+    moveToRow(0, function(){ busy = false; });
+  }
+
+  function loseLife(kind, hits){
+    busy = true;
+    lives--;
+    renderLives();
+    var msg = (kind === 'hit')
+      ? hits[Math.floor(Math.random() * hits.length)]
+      : TIMEOUT_CAPTIONS[Math.floor(Math.random() * TIMEOUT_CAPTIONS.length)];
+    showSplat(msg);
+    setTimeout(function(){
+      hideSplat();
+      if(lives <= 0){
+        finishGame();
+      } else {
+        timeLeft = TIME_LIMIT_MS;
+        updateTimerUI();
+        moveToRow(0, function(){ busy = false; });
+      }
+    }, 650);
   }
 
   function finishGame(){
-    hideSplat();
     playing = false;
     busy = false;
-    if(bestLaneThisRun > highScore){ highScore = bestLaneThisRun; saveHigh(highScore); }
-    finalScoreEl.textContent = bestLaneThisRun;
+    hideSplat();
+    if(score > highScore){ highScore = score; saveHigh(highScore); }
+    finalScoreEl.textContent = score;
     scoreBestEl.textContent = highScore;
-    var caption = FINAL_CAPTIONS[0].text;
+    var caption = FINAL_CAPTIONS[FINAL_CAPTIONS.length - 1].text;
     for(var i = 0; i < FINAL_CAPTIONS.length; i++){
-      if(bestLaneThisRun <= FINAL_CAPTIONS[i].max){ caption = FINAL_CAPTIONS[i].text; break; }
+      if(round <= FINAL_CAPTIONS[i].max){ caption = FINAL_CAPTIONS[i].text; break; }
     }
-    finalCaptionEl.textContent = 'nejdál: ' + bestLaneThisRun + ' pruhů — ' + caption;
+    finalCaptionEl.textContent = 'kolo ' + round + ' · ' + caption;
     overCard.classList.remove('hidden');
   }
 
   function attemptCross(){
     if(!playing || busy) return;
-    tapsUsed++;
-    tapsEl.textContent = tapsUsed;
+    if(row >= LANES) return;
 
-    var nearest = laneState[laneState.length - 1];
-    var travel = nearest.phase * (100 + nearest.params.width) - nearest.params.width;
-    var occStart = travel, occEnd = travel + nearest.params.width;
+    var lane = laneState[row];
+    var travel = travelFor(lane);
+    var occStart = travel, occEnd = travel + lane.params.width;
     var hitHalf = 6;
     var pStart = 50 - hitHalf, pEnd = 50 + hitHalf;
     var collided = occStart < pEnd && occEnd > pStart;
-    var ending = tapsUsed >= MAX_TAPS;
 
     if(collided){
-      busy = true;
-      showSplat(nearest.params);
-      setTimeout(function(){
-        if(ending) finishGame(); else respawn();
-      }, 650);
+      loseLife('hit', lane.params.hits);
     } else {
       busy = true;
-      currentLaneIndex++;
-      if(currentLaneIndex > bestLaneThisRun){
-        bestLaneThisRun = currentLaneIndex;
-        scoreValueEl.textContent = bestLaneThisRun;
-      }
-      // traffic is frozen (see the tick() guard below) for the whole step —
-      // the character visibly rises into the lane it just cleared, then the
-      // lane content shifts and the character settles back at the sidewalk.
-      var stepDist = rowEls[rowEls.length - 1].laneEl.offsetHeight || 60;
-      stepUpPlayer(stepDist, function(){
-        advanceLanes();
-        busy = false;
-        if(ending) finishGame();
+      score += 10;
+      scoreValueEl.textContent = score;
+      var nextRow = row + 1;
+      moveToRow(nextRow, function(){
+        if(nextRow >= LANES){ onReachHome(); } else { busy = false; }
       });
     }
   }
 
   function startRound(){
-    tapsUsed = 0;
-    currentLaneIndex = 0;
-    bestLaneThisRun = 0;
+    playing = true;
     busy = false;
-    tapsEl.textContent = 0;
+    lives = LIVES_START;
+    round = 1;
+    score = 0;
+    timeLeft = TIME_LIMIT_MS;
+    renderLives();
     scoreValueEl.textContent = 0;
     scoreBestEl.textContent = highScore;
+    roundLabelEl.textContent = 'kolo 1';
+    resetHomeSlots();
+    buildLanesForRound();
+    updateTimerUI();
     hideSplat();
-    rebuildLanes();
+    snapToStart();
     startCard.classList.add('hidden');
     overCard.classList.add('hidden');
-    playing = true;
   }
 
   startTap.addEventListener('click', startRound);
@@ -235,20 +309,28 @@
     attemptCross();
   });
 
-  // ---------- main loop: lanes keep moving in real time between taps ----------
+  // ---------- main loop: lanes keep moving in real time, timer keeps ticking ----------
   var last = performance.now();
   function tick(){
     var now = performance.now();
     var dt = Math.min(now - last, 1000 / 30);
     last = now;
 
-    if(active && playing && !busy && laneState.length){
-      for(var i = 0; i < laneState.length; i++){
-        var l = laneState[i];
-        l.phase += (dt / 1000) / l.params.period;
-        if(l.phase >= 1) l.phase -= Math.floor(l.phase);
+    if(active && playing && !busy){
+      if(laneState.length){
+        for(var i = 0; i < laneState.length; i++){
+          var l = laneState[i];
+          l.phase += (dt / 1000) / l.params.period;
+          if(l.phase >= 1) l.phase -= Math.floor(l.phase);
+        }
+        renderPositions();
       }
-      renderPositions();
+      timeLeft -= dt;
+      if(timeLeft <= 0){
+        timeLeft = 0;
+        loseLife('timeout', null);
+      }
+      updateTimerUI();
     }
 
     requestAnimationFrame(tick);
@@ -257,7 +339,7 @@
 
   if(reduceMotion){
     // vehicles still move (the timing IS the game); reduced-motion only
-    // strips the step-up/splat transition flourishes via the CSS media query.
+    // strips the step transition flourish via the CSS media query.
   }
 
   window.PSCrossing = {

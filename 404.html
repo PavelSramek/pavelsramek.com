@@ -34,7 +34,7 @@
     <div class="badges" id="scoreBadges"></div>
   </div>
   <div id="toast"></div>
-  <button id="tiltBtn" class="is-hidden">Povolit náklon telefonu</button>
+  <button id="tiltBtn" class="is-hidden">Povolit náklon a třesení telefonem</button>
 </div>
 
 <div id="curveRoot" class="game-hidden">
@@ -109,17 +109,22 @@
 <div id="crossingRoot" class="game-hidden">
   <div class="cx-stage">
     <div class="cx-hud">
-      <div class="title">Tapy</div>
-      <div class="taps"><span id="cxTaps">0</span>/50</div>
+      <div class="title">Životy</div>
+      <div class="cx-lives" id="cxLives">❤️❤️❤️</div>
+      <div class="title cx-timer-title">Čas</div>
+      <div class="cx-timer-bar"><div class="cx-timer-fill" id="cxTimerFill"></div></div>
     </div>
     <div class="cx-score-box">
       <div class="title">Skóre</div>
       <div class="value" id="cxScoreValue">0</div>
       <div class="best">nejlepší: <span id="cxScoreBest">0</span></div>
+      <div class="round" id="cxRoundLabel">kolo 1</div>
     </div>
     <div class="cx-field" id="cxField">
+      <div class="cx-home" id="cxHome"></div>
       <div class="cx-road" id="cxRoad"></div>
-      <div class="cx-sidewalk" id="cxSidewalk">
+      <div class="cx-sidewalk" id="cxSidewalk"></div>
+      <div class="cx-player-wrap" id="cxPlayerWrap">
         <div class="cx-player" id="cxPlayer">🚶</div>
         <div class="cx-splat" id="cxSplat"><div class="blob"></div><div class="cap" id="cxSplatCap"></div></div>
       </div>
@@ -128,12 +133,12 @@
     <div class="cx-startcard" id="cxStartCard">
       <div class="wow">Přejdi Americkou</div>
       <h1>Sdílená zóna. Bezpečná? Uvidíme.</h1>
-      <p>404 &middot; tahle stránka taky neexistuje, ale tahle hra ano. Aleš jen chce přejít na druhou stranu. Jedno ťuknutí = jeden pruh dopředu. Máš 50 ťuknutí.</p>
+      <p>404 &middot; tahle stránka taky neexistuje, ale tahle hra ano. Aleš jen chce přejít na druhou stranu, klidně vícekrát za sebou. Jedno ťuknutí = jeden pruh dopředu, provoz jede z obou stran. Máš 3 životy a čas na každý pokus.</p>
       <div class="legend"><span>👵 paní s holí</span><span>🧑‍🦽 pán na vozíku</span><span>🚗 veterán</span><span>🚐 MPV</span><span>🚌 autobus</span><span>🏎️ sporťák</span><span>🚎 trolejbus</span></div>
       <div class="tap" id="cxStartTap">Klepni a přejdi</div>
     </div>
     <div class="cx-overcard hidden" id="cxOverCard">
-      <h1>Konec směny</h1>
+      <h1>Směna skončila</h1>
       <div class="final" id="cxFinalScore">0</div>
       <div class="rank-final" id="cxFinalCaption"></div>
       <p>Sdílená zóna funguje. Většinou.</p>

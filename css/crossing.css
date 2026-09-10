@@ -2,7 +2,12 @@
    defines :root palette, html/body basics, #backlink, #corner and the
    shared .game-hidden / .game-switch toggle rules. Only game-specific
    classes live here, all prefixed cx- to avoid clashing with the other
-   games on the same page. */
+   games on the same page.
+
+   Frogger-style fixed board: a static stack of 7 traffic lanes between
+   a start sidewalk (bottom) and a home strip with 5 slots (top). One tap
+   crosses one lane; lives + a per-attempt timer replace the old endless
+   tap counter. */
 
 .cx-stage{
   position:fixed;inset:0;z-index:1;
@@ -22,7 +27,19 @@
   min-width:130px;
 }
 .cx-hud .title{color:#fff;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.66rem;margin-bottom:4px;opacity:.8;}
-.cx-hud .taps{font-family:'SF Mono','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;color:var(--gold);font-weight:600;}
+.cx-hud .cx-timer-title{margin-top:8px;}
+.cx-lives{font-size:.9rem;letter-spacing:2px;line-height:1;}
+.cx-timer-bar{
+  width:100%;height:6px;border-radius:999px;overflow:hidden;margin-top:2px;
+  background:rgba(255,255,255,0.08);
+}
+.cx-timer-fill{
+  height:100%;width:100%;
+  background:var(--gold);
+  transition:width .2s linear, background .2s linear;
+}
+.cx-timer-fill.warn{background:#e0a030;}
+.cx-timer-fill.danger{background:#d9424a;}
 
 .cx-score-box{
   position:fixed;top:22px;right:26px;z-index:5;
@@ -42,6 +59,10 @@
   font-family:'SF Mono','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
   font-size:.68rem;color:var(--muted);margin-top:4px;
 }
+.cx-score-box .round{
+  font-family:'SF Mono','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+  font-size:.66rem;color:var(--muted);margin-top:4px;
+}
 
 .cx-field{
   position:relative;
@@ -52,13 +73,32 @@
   border:1px solid rgba(255,255,255,0.08);
 }
 
+.cx-home{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  height:clamp(30px, 6vh, 40px);
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.1) 0 10px, transparent 10px 20px),
+    #7fae7a;
+}
+.cx-home-slot{
+  width:20px;height:20px;border-radius:6px;
+  background:rgba(255,255,255,0.18);
+  border:1px solid rgba(0,0,0,0.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.72rem;font-weight:700;color:#1c3a1c;
+}
+.cx-home-slot.filled{
+  background:var(--gold);
+  border-color:rgba(0,0,0,0.25);
+}
+
 .cx-road{
   display:flex;flex-direction:column;
 }
 
 .cx-lane{
   position:relative;
-  height:clamp(52px, 12vh, 66px);
+  height:clamp(32px, 6.5vh, 44px);
   background:
     repeating-linear-gradient(90deg, rgba(255,255,255,0.35) 0 18px, transparent 18px 34px) center / 100% 3px no-repeat,
     #33363f;
@@ -72,34 +112,35 @@
   transform:translateY(-50%);
   height:70%;
   display:flex;align-items:center;justify-content:center;
-  font-size:clamp(1.4rem, 5vw, 1.9rem);
+  font-size:clamp(1.1rem, 4.2vw, 1.5rem);
   filter:drop-shadow(0 4px 6px rgba(0,0,0,0.4));
   white-space:nowrap;
 }
+.cx-vehicle.rev{ transform:translateY(-50%) scaleX(-1); }
 
 .cx-sidewalk{
   position:relative;
-  height:clamp(58px, 13vh, 74px);
+  height:clamp(34px, 7vh, 46px);
   background:
     repeating-linear-gradient(90deg, rgba(0,0,0,0.12) 0 10px, transparent 10px 20px),
     #c9c2b4;
+}
+
+.cx-player-wrap{
+  position:absolute;left:50%;bottom:0;z-index:2;
+  transform:translateX(-50%);
+  width:clamp(56px, 16vw, 76px);
+  height:clamp(56px, 16vw, 76px);
   display:flex;align-items:center;justify-content:center;
+  transition:bottom .36s cubic-bezier(.34,1.56,.64,1);
+}
+@media (prefers-reduced-motion: reduce){
+  .cx-player-wrap{transition:none;}
 }
 
 .cx-player{
-  font-size:clamp(1.7rem, 6vw, 2.3rem);
   position:relative;z-index:2;
-  --cx-step:60px;
-}
-/* On a successful tap the traffic freezes (JS pauses the whole lane loop)
-   and the character visibly rises up into the lane it just cleared before
-   the road content shifts underneath it — makes the "you moved one lane"
-   read unambiguous instead of a tiny in-place bounce. */
-.cx-player.stepping{animation:cx-stepup .36s ease;}
-@keyframes cx-stepup{
-  0%{ transform:translateY(0) scale(1); }
-  55%{ transform:translateY(calc(-1 * var(--cx-step))) scale(1.1); }
-  100%{ transform:translateY(0) scale(1); }
+  font-size:clamp(1.7rem, 6vw, 2.3rem);
 }
 
 .cx-splat{
@@ -108,11 +149,11 @@
   gap:4px;
   opacity:0;pointer-events:none;
   transition:opacity .15s ease;
-  text-align:center;padding:0 10px;
+  text-align:center;padding:0 6px;
 }
 .cx-splat.show{opacity:1;}
 .cx-splat .blob{
-  position:absolute;inset:0;
+  position:absolute;inset:-40px;
   background:
     radial-gradient(circle at 38% 55%, rgba(150,10,20,0.88) 0 16%, transparent 60%),
     radial-gradient(circle at 60% 40%, rgba(120,8,16,0.85) 0 14%, transparent 58%),
@@ -120,9 +161,9 @@
 }
 .cx-splat .cap{
   position:relative;z-index:1;
-  font-weight:700;font-size:.82rem;color:#fff;
+  font-weight:700;font-size:.74rem;color:#fff;
   text-shadow:0 2px 6px rgba(0,0,0,0.7);
-  max-width:280px;line-height:1.35;
+  max-width:220px;line-height:1.3;
 }
 
 .cx-tapzone{
@@ -167,5 +208,5 @@
 }
 
 @media (prefers-reduced-motion: reduce){
-  .cx-player, .cx-splat, .cx-startcard, .cx-overcard{transition:none;animation:none;}
+  .cx-splat, .cx-startcard, .cx-overcard{transition:none;animation:none;}
 }

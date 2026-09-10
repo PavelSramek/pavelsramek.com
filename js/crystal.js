@@ -16,13 +16,17 @@
   // 5 faces carry the approved 2026 priority slogans (verbatim from the
   // campaign leaflet copy), 1 face is a plain brand card. Order here maps
   // 1:1 onto THREE.BoxGeometry's default material groups: [+X,-X,+Y,-Y,+Z,-Z].
+  // Each face also carries a real die number ("num") so the same object can
+  // double as an honest 1-6 die to roll for a board game — +X/-X, +Y/-Y and
+  // +Z/-Z are opposite face pairs, numbered so opposite faces sum to 7 just
+  // like a standard die.
   var FACES = [
-    { id: 'young',    kind: 'priority', emoji: '🧒', title: 'Budoucnost pro mladé', sub: 'Stavíme školky, aby v Plzni 3 mělo místo každé dítě.', colorA: '#9b3fae', colorB: '#d95c86' },
-    { id: 'office',   kind: 'priority', emoji: '💻', title: 'Moderní úřad',         sub: 'Chceme úřad, který funguje z mobilu, ne z fronty.',     colorA: '#3a2f7d', colorB: '#5c6fd9' },
-    { id: 'green',    kind: 'priority', emoji: '🌳', title: 'Více zeleně',          sub: 'Měníme beton za parky.',                                colorA: '#1f6b46', colorB: '#3fae7b' },
-    { id: 'traffic',  kind: 'priority', emoji: '🚗', title: 'Klidnější obvod',      sub: 'Méně tranzitu, víc klidu pro lidi.',                    colorA: '#2f5d7d', colorB: '#4f8fae' },
-    { id: 'housing',  kind: 'priority', emoji: '🏠', title: 'Dostupné bydlení',     sub: 'Stavíme byty pro mladé rodiny.',                        colorA: '#ae7b3f', colorB: '#ffc93c' },
-    { id: 'brand',    kind: 'brand',    emoji: '🎲', title: 'PAVEL ŠRÁMEK',         sub: 'pavelsramek.com',                                       colorA: '#1a1224', colorB: '#0b0e16' }
+    { id: 'young',    kind: 'priority', emoji: '🧒', title: 'Budoucnost pro mladé', sub: 'Stavíme školky, aby v Plzni 3 mělo místo každé dítě.', colorA: '#9b3fae', colorB: '#d95c86', num: 1 },
+    { id: 'office',   kind: 'priority', emoji: '💻', title: 'Moderní úřad',         sub: 'Chceme úřad, který funguje z mobilu, ne z fronty.',     colorA: '#3a2f7d', colorB: '#5c6fd9', num: 6 },
+    { id: 'green',    kind: 'priority', emoji: '🌳', title: 'Více zeleně',          sub: 'Měníme beton za parky.',                                colorA: '#1f6b46', colorB: '#3fae7b', num: 2 },
+    { id: 'traffic',  kind: 'priority', emoji: '🚗', title: 'Klidnější obvod',      sub: 'Méně tranzitu, víc klidu pro lidi.',                    colorA: '#2f5d7d', colorB: '#4f8fae', num: 5 },
+    { id: 'housing',  kind: 'priority', emoji: '🏠', title: 'Dostupné bydlení',     sub: 'Stavíme byty pro mladé rodiny.',                        colorA: '#ae7b3f', colorB: '#ffc93c', num: 3 },
+    { id: 'brand',    kind: 'brand',    emoji: '🎲', title: 'PAVEL ŠRÁMEK',         sub: 'pavelsramek.com',                                       colorA: '#1a1224', colorB: '#0b0e16', num: 4 }
   ];
 
   // ---------- gamification: persistent score + badges (localStorage, per browser) ----------
@@ -123,17 +127,20 @@
   stage.appendChild(renderer.domElement);
 
   // ---------- lighting ----------
-  scene.add(new THREE.AmbientLight(0x404060, 0.9));
+  // Kept deliberately soft/matte — the accent point lights used to throw a
+  // hard glossy hotspot across the die; toned down here alongside the
+  // material tweak below so the slogans stay readable from any angle.
+  scene.add(new THREE.AmbientLight(0x404060, 0.95));
 
-  var keyLight = new THREE.DirectionalLight(0xffffff, 0.9);
+  var keyLight = new THREE.DirectionalLight(0xffffff, 0.75);
   keyLight.position.set(4, 6, 8);
   scene.add(keyLight);
 
-  var rimLight = new THREE.PointLight(0xd95c86, 2.2, 30);
+  var rimLight = new THREE.PointLight(0xd95c86, 1.1, 30);
   rimLight.position.set(-5, -2, 4);
   scene.add(rimLight);
 
-  var orbitLight = new THREE.PointLight(0xffc93c, 2.6, 30);
+  var orbitLight = new THREE.PointLight(0xffc93c, 1.3, 30);
   scene.add(orbitLight);
 
   // ---------- texture helpers: draw one canvas "card" per die face ----------
@@ -159,6 +166,24 @@
     for(var j = 0; j < lines.length; j++){
       ctx.fillText(lines[j], cx, startY + j * lineHeight);
     }
+  }
+
+  function drawNumberBadge(ctx, cx, cy, num){
+    var r = 34;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(11,14,22,0.55)';
+    ctx.fill();
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+    ctx.stroke();
+    ctx.fillStyle = '#fff';
+    ctx.font = '700 40px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(num), cx, cy + 2);
+    ctx.restore();
   }
 
   function makeFaceTexture(face){
@@ -203,6 +228,13 @@
     ctx.font = '600 22px Inter, sans-serif';
     ctx.fillText('PLZEŇ 3 · 2026', size / 2, size - 34);
 
+    // corner number badges — so the same die also works as an honest 1-6
+    // die for tabletop games, readable no matter how it lands or spins.
+    if(face.num){
+      drawNumberBadge(ctx, size * 0.12, size * 0.12, face.num);
+      drawNumberBadge(ctx, size * 0.88, size * 0.88, face.num);
+    }
+
     var tex = new THREE.CanvasTexture(canvas);
     if(renderer.capabilities && renderer.capabilities.getMaxAnisotropy){
       tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
@@ -215,13 +247,15 @@
   // [+X, -X, +Y, -Y, +Z, -Z] — FACES above is written to match.
   var DIE_SIZE = 2.2;
   var geo = new THREE.BoxGeometry(DIE_SIZE, DIE_SIZE, DIE_SIZE);
+  // matte-leaning finish: high roughness + a bare whisper of clearcoat keeps
+  // the printed slogans readable instead of drowning in a glossy hotspot
   var materials = FACES.map(function(face){
     return new THREE.MeshPhysicalMaterial({
       map: makeFaceTexture(face),
-      roughness: 0.38,
-      metalness: 0.06,
-      clearcoat: 0.35,
-      clearcoatRoughness: 0.35
+      roughness: 0.68,
+      metalness: 0.03,
+      clearcoat: 0.06,
+      clearcoatRoughness: 0.75
     });
   });
 
@@ -291,7 +325,20 @@
   var tiltBaseline = null;
   var gravity = { x: 0, y: 0 };
   var TILT_RANGE = 26;       // degrees of tilt to reach full gravity strength
-  var GRAVITY_STRENGTH = 10; // world units / s^2 at full tilt
+  var GRAVITY_STRENGTH = 12; // world units / s^2 at full tilt
+
+  // baseline "tabletop" gravity — active whenever tilt isn't, so the die
+  // always has real weight and settles at the bottom of the screen instead
+  // of just drifting to a stop wherever it was thrown
+  var BASE_GRAVITY = 6.5;
+  // a heavier die: throws land softer, walls feel like a dull thud instead
+  // of a bouncy ball, and everything damps out a touch quicker
+  var THROW_MASS = 1.35;
+  // below this impact speed a wall "hit" is treated as resting contact
+  // (velocity just clamped to zero) instead of a bounce — otherwise the
+  // constant downward gravity above would keep re-triggering tiny bounces
+  // against the floor forever and the die would never settle into landing
+  var MIN_BOUNCE_SPEED = 0.15;
 
   function handleOrientation(e){
     if(e.beta === null || e.gamma === null) return;
@@ -302,10 +349,48 @@
     gravity.y = Math.max(-1, Math.min(1, dBeta / TILT_RANGE));
   }
 
+  // ---------- shake to roll ----------
+  // Once tilt is on, a real shake of the phone (not just a slow tilt) gives
+  // the die a hard random kick — like shaking dice in cupped hands — so it
+  // tumbles and lands on a fresh face without needing a drag/flick gesture.
+  var lastAccel = null;
+  var lastShakeTime = 0;
+  var SHAKE_THRESHOLD = 22;  // m/s^2 of jerk between readings
+  var SHAKE_COOLDOWN = 650;  // ms — ignore re-triggers mid-shake
+
+  function triggerShakeRoll(){
+    landed = false;
+    landing = false;
+    idleTimer = 0;
+    var kick = 3 + Math.random() * 3;
+    vel.x += (Math.random() * 2 - 1) * kick;
+    vel.y += (Math.random() * 2 - 1) * kick * 0.7 + kick * 0.5;
+    angVel.x += (Math.random() * 2 - 1) * 7;
+    angVel.y += (Math.random() * 2 - 1) * 7;
+    angVel.z += (Math.random() * 2 - 1) * 5;
+    if(!hintHidden){ hint.classList.add('is-hidden'); hintHidden = true; }
+  }
+
+  function handleMotion(e){
+    var a = e.accelerationIncludingGravity || e.acceleration;
+    if(!a || a.x === null || a.x === undefined) return;
+    if(lastAccel){
+      var dx = a.x - lastAccel.x, dy = a.y - lastAccel.y, dz = a.z - lastAccel.z;
+      var jerk = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      var now = performance.now();
+      if(jerk > SHAKE_THRESHOLD && now - lastShakeTime > SHAKE_COOLDOWN){
+        lastShakeTime = now;
+        triggerShakeRoll();
+      }
+    }
+    lastAccel = a;
+  }
+
   function startTilt(){
     tiltEnabled = true;
     tiltBaseline = null; // recalibrate from the very next reading
     window.addEventListener('deviceorientation', handleOrientation);
+    window.addEventListener('devicemotion', handleMotion);
     if(tiltBtn) tiltBtn.classList.add('is-hidden');
     if(!hintHidden){ hint.classList.add('is-hidden'); hintHidden = true; }
   }
@@ -313,14 +398,20 @@
   function initTilt(){
     if(!tiltSupported || reduceMotion) return;
     var DOE = window.DeviceOrientationEvent;
+    var DME = window.DeviceMotionEvent;
     if(typeof DOE.requestPermission === 'function'){
-      // iOS 13+ requires an explicit tap before it will grant sensor access
+      // iOS 13+ requires an explicit tap before it will grant sensor access —
+      // orientation and motion are separate permissions there, so both get
+      // requested from the same tap.
       if(tiltBtn){
         tiltBtn.classList.remove('is-hidden');
         tiltBtn.addEventListener('click', function(){
           DOE.requestPermission().then(function(state){
             if(state === 'granted') startTilt();
           }).catch(function(){});
+          if(DME && typeof DME.requestPermission === 'function'){
+            DME.requestPermission().catch(function(){});
+          }
         });
       }
     } else {
@@ -489,13 +580,15 @@
     if(!dragging) return;
     dragging = false;
     stage.classList.remove('dragging');
-    vel.copy(sampledVel);
+    // a heavier die doesn't fly off at full flick speed — scale the release
+    // velocity down by its "mass" so throws feel weighty, not floaty
+    vel.copy(sampledVel).divideScalar(THROW_MASS);
     vel.z = 0;
     // throwing motion imparts spin perpendicular to the velocity direction —
     // like flicking a die, it tumbles in the direction it was thrown
-    angVel.x += -sampledVel.y * 0.55;
-    angVel.y += sampledVel.x * 0.55;
-    angVel.z += (sampledVel.x - sampledVel.y) * 0.12;
+    angVel.x += -sampledVel.y * 0.4 / THROW_MASS;
+    angVel.y += sampledVel.x * 0.4 / THROW_MASS;
+    angVel.z += (sampledVel.x - sampledVel.y) * 0.09 / THROW_MASS;
 
     var releaseSpeed = Math.hypot(sampledVel.x, sampledVel.y);
     if(releaseSpeed > 0.4){
@@ -532,6 +625,11 @@
     }
 
     if(!dragging){
+      // captured before gravity is applied this frame, so a slow/irregular
+      // frame's own (possibly large) gravity delta can never masquerade as
+      // "real incoming motion" when classifying the wall contact below
+      var entryVelX = vel.x, entryVelY = vel.y;
+
       if(tiltEnabled){
         vel.x += gravity.x * GRAVITY_STRENGTH * dt;
         vel.y -= gravity.y * GRAVITY_STRENGTH * dt;
@@ -539,11 +637,52 @@
         // the throw's spin-perpendicular-to-motion below
         angVel.x += -gravity.y * dt * 1.4;
         angVel.y += gravity.x * dt * 1.4;
+      } else {
+        // no phone sensor in play — the die still has real weight and
+        // always falls toward the bottom of the screen, like on a table
+        vel.y -= BASE_GRAVITY * dt;
       }
 
       // integrate free flight
       pos.addScaledVector(vel, dt);
 
+      // wall collisions with a bit of restitution + a spin kick — a hard
+      // bounce always wakes the die up, landed or not. Restitution is kept
+      // low (a dull thud, not a bouncy ball) to match the die's added weight.
+      // Whether a contact counts as a real bounce is judged on the velocity
+      // the die already had coming into this frame (entryVel*), not the
+      // post-gravity value — otherwise a slow/irregular frame's own gravity
+      // delta could masquerade as an "impact" and the die would never
+      // settle, forever re-bouncing at ~zero amplitude.
+      if(pos.x > boundX){
+        pos.x = boundX;
+        if(Math.abs(entryVelX) > MIN_BOUNCE_SPEED){ onBounce(Math.abs(vel.x)); vel.x *= -0.42; angVel.y += -vel.x * 0.28; triggerSquash(1, 0); landed = false; landing = false; }
+        else vel.x = 0;
+      } else if(pos.x < -boundX){
+        pos.x = -boundX;
+        if(Math.abs(entryVelX) > MIN_BOUNCE_SPEED){ onBounce(Math.abs(vel.x)); vel.x *= -0.42; angVel.y += -vel.x * 0.28; triggerSquash(1, 0); landed = false; landing = false; }
+        else vel.x = 0;
+      }
+      if(pos.y > boundY){
+        pos.y = boundY;
+        if(Math.abs(entryVelY) > MIN_BOUNCE_SPEED){ onBounce(Math.abs(vel.y)); vel.y *= -0.42; angVel.x += vel.y * 0.28; triggerSquash(0, 1); landed = false; landing = false; }
+        else vel.y = 0;
+      } else if(pos.y < -boundY){
+        pos.y = -boundY;
+        if(Math.abs(entryVelY) > MIN_BOUNCE_SPEED){ onBounce(Math.abs(vel.y)); vel.y *= -0.42; angVel.x += vel.y * 0.28; triggerSquash(0, 1); landed = false; landing = false; }
+        else vel.y = 0;
+      }
+
+      // damping — heavier now: settles calmer and a bit sooner
+      vel.multiplyScalar(Math.pow(0.975, dt * 60));
+      angVel.multiplyScalar(Math.pow(0.978, dt * 60));
+
+      // speed/spin are read AFTER the wall-contact clamp and damping above,
+      // not before — a die resting against a wall has just had its velocity
+      // clamped to exactly 0 there, so this reads as truly still no matter
+      // how strong gravity is or how long/short this frame's dt was. Reading
+      // it earlier (pre-clamp) meant a slow frame's own gravity delta alone
+      // could look like "still moving" and the die would tumble forever.
       var speed2 = vel.x * vel.x + vel.y * vel.y;
       var spin2 = angVel.lengthSq();
 
@@ -555,17 +694,6 @@
       if(!landed && !landing){
         if(speed2 < 0.02 && spin2 < 0.05){ idleTimer += dt; } else { idleTimer = 0; }
       }
-
-      // wall collisions with a bit of restitution + a spin kick — a hard
-      // bounce always wakes the die up, landed or not
-      if(pos.x > boundX){ pos.x = boundX; onBounce(Math.abs(vel.x)); vel.x *= -0.72; angVel.y += -vel.x * 0.4; triggerSquash(1, 0); landed = false; landing = false; }
-      else if(pos.x < -boundX){ pos.x = -boundX; onBounce(Math.abs(vel.x)); vel.x *= -0.72; angVel.y += -vel.x * 0.4; triggerSquash(1, 0); landed = false; landing = false; }
-      if(pos.y > boundY){ pos.y = boundY; onBounce(Math.abs(vel.y)); vel.y *= -0.72; angVel.x += vel.y * 0.4; triggerSquash(0, 1); landed = false; landing = false; }
-      else if(pos.y < -boundY){ pos.y = -boundY; onBounce(Math.abs(vel.y)); vel.y *= -0.72; angVel.x += vel.y * 0.4; triggerSquash(0, 1); landed = false; landing = false; }
-
-      // damping — a touch livelier while fast, calmer near rest
-      vel.multiplyScalar(Math.pow(0.985, dt * 60));
-      angVel.multiplyScalar(Math.pow(0.988, dt * 60));
 
       // once it truly settles (and isn't being held tilted), start the
       // snap-to-face landing sequence instead of tumbling forever
