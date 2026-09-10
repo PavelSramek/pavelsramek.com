@@ -15,6 +15,8 @@
   var finalScoreEl = document.getElementById('gwFinalScore');
   var finalCaptionEl = document.getElementById('gwFinalCaption');
   var retryTap = document.getElementById('gwRetryTap');
+  var leftBtn = document.getElementById('gwLeftBtn');
+  var rightBtn = document.getElementById('gwRightBtn');
 
   // "Unikovka z Plzne" - nekonecny dodger s naklonem telefonu (styl Flappy
   // Bird / Doodle Jump). Auto samo jede mestem, hrac uhyba vlevo/vpravo
@@ -218,16 +220,48 @@
   window.addEventListener('pointerup', function(){ dragging = false; });
   window.addEventListener('pointercancel', function(){ dragging = false; });
 
+  // keyDir combines keyboard arrows (desktop) and the on-screen ◀/▶
+  // buttons (always visible, primary control on devices without/before
+  // tilt) into one continuous steering input, same convention as Zatáčka's
+  // ctrl-btn cluster.
+  var keyLeft = false, keyRight = false;
+  var btnLeft = false, btnRight = false;
   var keyDir = 0;
   var KEY_SPEED = 90; // percent/s
+  function updateDir(){
+    keyDir = ((keyRight || btnRight) ? 1 : 0) - ((keyLeft || btnLeft) ? 1 : 0);
+  }
   window.addEventListener('keydown', function(e){
-    if(e.key === 'ArrowLeft'){ keyDir = -1; }
-    else if(e.key === 'ArrowRight'){ keyDir = 1; }
+    if(e.key === 'ArrowLeft'){ keyLeft = true; updateDir(); }
+    else if(e.key === 'ArrowRight'){ keyRight = true; updateDir(); }
   });
   window.addEventListener('keyup', function(e){
-    if(e.key === 'ArrowLeft' && keyDir === -1) keyDir = 0;
-    if(e.key === 'ArrowRight' && keyDir === 1) keyDir = 0;
+    if(e.key === 'ArrowLeft'){ keyLeft = false; updateDir(); }
+    if(e.key === 'ArrowRight'){ keyRight = false; updateDir(); }
   });
+
+  function bindCtrlBtn(el, setHeld){
+    if(!el) return;
+    function down(e){
+      e.preventDefault();
+      setHeld(true);
+      el.classList.add('active');
+      try{ el.setPointerCapture(e.pointerId); }catch(err){}
+      updateDir();
+    }
+    function up(e){
+      e.preventDefault();
+      setHeld(false);
+      el.classList.remove('active');
+      updateDir();
+    }
+    el.addEventListener('pointerdown', down);
+    el.addEventListener('pointerup', up);
+    el.addEventListener('pointercancel', up);
+    el.addEventListener('pointerleave', up);
+  }
+  bindCtrlBtn(leftBtn, function(v){ btnLeft = v; });
+  bindCtrlBtn(rightBtn, function(v){ btnRight = v; });
 
   // ---------- tilt (same iOS 13+ permission pattern as Kostka) ----------
   var tiltSupported = 'DeviceOrientationEvent' in window;

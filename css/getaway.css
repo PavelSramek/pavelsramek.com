@@ -14,6 +14,8 @@
 }
 
 .gw-hud{
+  /* bottom-left, matching the sitewide convention (.pz-hud in politician.css,
+     .cx-hud in crossing.css both sit bottom-left too). */
   position:fixed;bottom:22px;left:22px;z-index:5;
   font-family:'SF Mono','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
   font-size:.72rem;letter-spacing:.03em;color:var(--muted);
@@ -85,13 +87,25 @@
 .gw-obstacle{
   position:absolute;
   transform:translate(-50%, -50%);
+  /* fixed height (not aspect-ratio off the variable per-type width) so the
+     visible tile always matches OBST_HALF_H in getaway.js — a wide obstacle
+     (e.g. the parade) used to get a proportionally taller box than its
+     actual hitbox, which read as "I can't tell where this thing's edge is". */
+  height:13%;
+  box-sizing:border-box;
   display:flex;align-items:center;justify-content:center;
-  aspect-ratio:1.6/1;
-  font-size:clamp(1.3rem, 7vw, 2rem);
-  filter:drop-shadow(0 0 6px rgba(255,255,255,0.3)) drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+  line-height:1;
+  border-radius:10px;
+  background:rgba(15,17,23,0.55);
+  border:2px solid rgba(255,201,60,0.6);
+  box-shadow:0 6px 14px -6px rgba(0,0,0,0.65), inset 0 0 0 1px rgba(0,0,0,0.25);
+  font-size:clamp(1.05rem, 5.2vw, 1.55rem);
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,0.55));
   pointer-events:none;
   white-space:nowrap;
+  overflow:hidden;
 }
+.gw-obstacle span{ line-height:1; }
 
 .gw-player{
   position:absolute;top:86%;left:50%;
@@ -158,6 +172,30 @@
   font-size:2.1rem;font-weight:700;color:var(--gold);
 }
 .gw-overcard .rank-final{font-size:.85rem;color:#fff;font-weight:600;margin-top:-4px;max-width:300px;}
+
+.gw-ctrl-btn{
+  /* upper-third on the sides — not true mid-height (50%), because the
+     sitewide #gameSwitch pill (game-switch.js, shared across all games)
+     is fixed at top:50%;right:14px and would sit right on top of a
+     mid-height right button. .gw-hud (bottom-left) and #gwTiltBtn
+     (bottom-center) own the bottom row, .gw-score-box owns the top-right,
+     so top:32% is the one spot that clears all of them. */
+  position:fixed;top:32%;transform:translateY(-50%);z-index:6;
+  width:60px;height:60px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.3rem;color:#fff;border:none;
+  background:rgba(255,255,255,0.08);
+  border:2px solid rgba(255,255,255,0.2);
+  -webkit-tap-highlight-color:transparent;
+  touch-action:none;cursor:pointer;
+  transition:transform .1s ease, filter .1s ease;
+}
+.gw-ctrl-btn.active{filter:brightness(1.6);transform:translateY(-50%) scale(0.92);}
+.gw-ctrl-left{left:10px;}
+.gw-ctrl-right{right:10px;}
+@media (prefers-reduced-motion: reduce){
+  .gw-ctrl-btn{transition:none;}
+}
 
 #gwTiltBtn{
   position:fixed;bottom:26px;left:50%;z-index:7;

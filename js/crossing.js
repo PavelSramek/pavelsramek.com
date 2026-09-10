@@ -328,7 +328,19 @@
 
   function attemptCross(){
     if(!playing || busy) return;
-    if(row >= LANES) return;
+
+    if(row >= LANES){
+      // Aleš already survived the traffic and is standing at the very edge
+      // of the last lane (still exposed there — checkContinuousCollision
+      // keeps testing it while he waits, same as any other lane). This
+      // second, deliberate tap is the actual step up onto the curb/home
+      // strip, kept separate from clearing the last lane's hazard so
+      // "made it past the last car" and "actually made it across" read as
+      // two distinct moments, not one automatic teleport.
+      busy = true;
+      onReachHome();
+      return;
+    }
 
     var lane = laneState[row];
     var travel = travelFor(lane);
@@ -342,10 +354,7 @@
       busy = true;
       score += 10;
       scoreValueEl.textContent = score;
-      var nextRow = row + 1;
-      moveToRow(nextRow, function(){
-        if(nextRow >= LANES){ onReachHome(); } else { busy = false; }
-      });
+      moveToRow(row + 1, function(){ busy = false; });
     }
   }
 

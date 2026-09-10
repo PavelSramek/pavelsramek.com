@@ -1051,6 +1051,7 @@ section { padding: 72px 0; }
 }
 .linkbio-btn .social-feed-icon.x { background: #000; }
 .linkbio-btn .social-feed-icon.tt { background: #000; }
+.linkbio-btn .social-feed-icon.game { background: linear-gradient(135deg, var(--purple), var(--pink)); font-size: 1.3rem; }
 .linkbio-btn-label { flex: 1; min-width: 0; }
 .linkbio-btn-label strong { display: block; font-size: 1rem; }
 .linkbio-btn-label span { display: block; color: var(--muted); font-size: 0.85rem; }
