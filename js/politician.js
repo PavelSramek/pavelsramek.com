@@ -372,10 +372,22 @@
   function gameOver(){
     playing = false;
     resetZones();
-    // Reached the boss's score threshold but died before surviving
-    // BOSS_SURVIVE_MS of it → the "achieved level" shown falls back to
-    // the previous rank (Šrámek), not Zarzycký. See bossBeaten() above.
-    var displayIndex = (rankIndex === BOSS_INDEX && !bossBeaten()) ? BOSS_INDEX - 1 : rankIndex;
+    // "Dosažená úroveň" = poslední level, který hráč doopravdy PROŠEL (tzn.
+    // dosáhl skóre i pro NÁSLEDUJÍCÍ level) — ne level, který právě
+    // rozehrával, když umřel. Level, na kterém zrovna umřel, se proto
+    // nezapočítává a zobrazí se ten předchozí. U posledního (boss) levelu
+    // žádný "následující" neexistuje, takže se místo toho použije
+    // bossBeaten() (přežití BOSS_SURVIVE_MS) jako náhradní podmínka.
+    // (Oprava 10. 9. 2026: dřív se tohle vztahovalo jen na boss level;
+    // uživatel po odzkoušení nahlásil, že umřel v levelu 2 - Michal
+    // Vozobule - a čekal dosaženou úroveň 1 - Radek Proch, ale dostal
+    // level 2, takže pravidlo platí obecně pro všechny levely.)
+    var displayIndex;
+    if(rankIndex === BOSS_INDEX){
+      displayIndex = bossBeaten() ? BOSS_INDEX : BOSS_INDEX - 1;
+    } else {
+      displayIndex = Math.max(0, rankIndex - 1);
+    }
     var dispRank = RANKS[displayIndex];
     finalScoreEl.textContent = score;
     finalRankEl.textContent = 'dosažená úroveň: ' + levelLabel(displayIndex) + ' · ' + dispRank.name + ' (' + dispRank.party + ')';

@@ -108,9 +108,20 @@
 .cx-lane:nth-child(even){ background-color:#3a3d47; }
 
 .cx-vehicle{
-  position:absolute;top:50%;
+  position:absolute;top:50%;z-index:1;
   transform:translateY(-50%);
   height:60%;
+  /* the box below is the ACTUAL hit zone used by the collision check in
+     crossing.js (occStart/occEnd = this element's left/width) — it used to
+     be invisible (just a centered emoji floating in empty space), so a
+     wide vehicle (bus/trolejbus) could clip Aleš well before its icon
+     visually reached him. Rendering the box itself as a solid body means
+     what you see IS what can hit you, same as the original Frogger's
+     sprites always filling their own collision rect. */
+  border-radius:7px;
+  background:rgba(8,10,16,0.4);
+  border:1px solid rgba(255,255,255,0.16);
+  box-shadow:0 3px 8px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.1);
   display:flex;align-items:center;justify-content:center;
   font-size:clamp(1.1rem, 4.2vw, 1.5rem);
   filter:drop-shadow(0 4px 6px rgba(0,0,0,0.4));
@@ -124,6 +135,19 @@
   background:
     repeating-linear-gradient(90deg, rgba(0,0,0,0.12) 0 10px, transparent 10px 20px),
     #c9c2b4;
+}
+
+.cx-corridor{
+  /* Aleš's own crossing column — always centered, see PLAYER_HIT_HALF in
+     crossing.js, which also sets this element's left/width so the two
+     never drift apart. Runs behind the vehicles/player, in front of the
+     lane backgrounds, so the "real" danger zone in each lane (not just
+     the one Aleš is currently on) reads at a glance. */
+  position:absolute;top:0;bottom:0;z-index:0;
+  background:rgba(255,255,255,0.05);
+  border-left:1px dashed rgba(255,255,255,0.2);
+  border-right:1px dashed rgba(255,255,255,0.2);
+  pointer-events:none;
 }
 
 .cx-player-wrap{

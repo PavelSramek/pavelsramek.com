@@ -22,6 +22,7 @@
   if(stageEl && splatEl && splatEl.parentNode !== stageEl){
     stageEl.appendChild(splatEl);
   }
+  var fieldEl = document.getElementById('cxField');
   var tapZoneEl = document.getElementById('cxTapZone');
   var startCard = document.getElementById('cxStartCard');
   var startTap = document.getElementById('cxStartTap');
@@ -85,6 +86,10 @@
   var LIVES_START = 3;
   var TIME_LIMIT_MS = 30000;
   var STEP_MS = 360;                // must match the .cx-player-wrap "bottom" transition duration
+  var PLAYER_HIT_HALF = 6;          // Aleš's crossing column is always horizontally centered
+                                     // (50% ± this, in % of lane width) — shared by the collision
+                                     // check in attemptCross() and the visible corridor guide below,
+                                     // so the marked "safe lane" always matches what's actually tested.
 
   var active = true;    // host-controlled pause, same convention as the other games
   var playing = false;
@@ -128,6 +133,19 @@
     slotEl.className = 'cx-home-slot';
     homeEl.appendChild(slotEl);
     homeSlotEls.push(slotEl);
+  }
+
+  // Visible guide for the column Aleš actually crosses in (always centered,
+  // see PLAYER_HIT_HALF above). Runs the full height of the field, behind
+  // the vehicles and the player token, so a lane's real danger zone is
+  // readable at a glance — including lanes above the one Aleš is currently
+  // on — instead of only being visible once a vehicle's box reaches it.
+  if(fieldEl){
+    var corridorEl = document.createElement('div');
+    corridorEl.className = 'cx-corridor';
+    corridorEl.style.left = (50 - PLAYER_HIT_HALF) + '%';
+    corridorEl.style.width = (PLAYER_HIT_HALF * 2) + '%';
+    fieldEl.appendChild(corridorEl);
   }
 
   function resetHomeSlots(){
@@ -299,8 +317,7 @@
     var lane = laneState[row];
     var travel = travelFor(lane);
     var occStart = travel, occEnd = travel + lane.params.width;
-    var hitHalf = 6;
-    var pStart = 50 - hitHalf, pEnd = 50 + hitHalf;
+    var pStart = 50 - PLAYER_HIT_HALF, pEnd = 50 + PLAYER_HIT_HALF;
     var collided = occStart < pEnd && occEnd > pStart;
 
     if(collided){

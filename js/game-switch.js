@@ -4,8 +4,9 @@
   var curveRoot = document.getElementById('curveRoot');
   var politicianRoot = document.getElementById('politicianRoot');
   var crossingRoot = document.getElementById('crossingRoot');
+  var getawayRoot = document.getElementById('getawayRoot');
   var corner = document.getElementById('corner');
-  if(!btn || !crystalRoot || !curveRoot || !politicianRoot || !crossingRoot) return;
+  if(!btn || !crystalRoot || !curveRoot || !politicianRoot || !crossingRoot || !getawayRoot) return;
 
   // cycle order: each game's entry says which root/setActive it owns, what
   // the corner tech-credit should read while it's showing, and what the
@@ -19,9 +20,11 @@
     { root: politicianRoot, setActive: function(v){ if(window.PSPolitician) window.PSPolitician.setActive(v); },
       corner: 'vlastní herní engine &middot; <b>DOM/CSS</b>' },
     { root: crossingRoot,   setActive: function(v){ if(window.PSCrossing) window.PSCrossing.setActive(v); },
+      corner: 'vlastní herní engine &middot; <b>DOM/CSS</b>' },
+    { root: getawayRoot,    setActive: function(v){ if(window.PSGetaway) window.PSGetaway.setActive(v); },
       corner: 'vlastní herní engine &middot; <b>DOM/CSS</b>' }
   ];
-  var NEXT_LABEL = ['🌀 Zatáčka', '🕴️ Politik', '🚦 Americká', '🎲 Kostka'];
+  var NEXT_LABEL = ['🌀 Zatáčka', '🕴️ Politik', '🚦 Přejdi Americkou', '🚗 Únikovka', '🎲 Kostka'];
 
   var current = 0;
 

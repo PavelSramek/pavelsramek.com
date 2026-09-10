@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="css/curve.css">
 <link rel="stylesheet" href="css/politician.css">
 <link rel="stylesheet" href="css/crossing.css">
+<link rel="stylesheet" href="css/getaway.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
@@ -149,12 +150,52 @@
   </div>
 </div>
 
+<div id="getawayRoot" class="game-hidden">
+  <div class="gw-stage">
+    <div class="gw-hud">
+      <div class="title">Životy</div>
+      <div class="gw-lives" id="gwLives">❤️❤️❤️</div>
+    </div>
+    <div class="gw-score-box">
+      <div class="title">Skóre</div>
+      <div class="value" id="gwScoreValue">0</div>
+      <div class="best">nejlepší: <span id="gwScoreBest">0</span></div>
+    </div>
+    <div class="gw-field" id="gwField">
+      <div class="gw-curb left"></div>
+      <div class="gw-curb right"></div>
+      <div class="gw-road" id="gwRoad"></div>
+      <div class="gw-player" id="gwPlayer">🚗</div>
+    </div>
+    <div class="gw-caption" id="gwCaption"></div>
+    <div class="gw-startcard" id="gwStartCard">
+      <div class="wow">Únikovka z Plzně</div>
+      <h1>Projeď obvodem, aniž bys skončil na chodníku</h1>
+      <p>Nakloň telefon a uhýbej. Auto jede samo, ty ho jen řídíš doleva/doprava před vším, co ti obvod nachystá.</p>
+      <div class="legend">
+        <span>🚧 uzavírka</span><span>👷 oprava silnice</span><span>🕳️ výkop</span>
+        <span>🪠 kanalizace</span><span>🚰 vodovod</span><span>🚨 nehoda</span><span>🏳️‍🌈 průvod</span>
+      </div>
+      <div class="tap" id="gwStartTap">Klepni a jeď</div>
+    </div>
+    <div class="gw-overcard hidden" id="gwOverCard">
+      <h1>Konec jízdy</h1>
+      <div class="final" id="gwFinalScore">0</div>
+      <div class="rank-final" id="gwFinalCaption"></div>
+      <p>Obvod se neopravuje sám. Zkus to znovu.</p>
+      <div class="tap" id="gwRetryTap">Zkusit znovu</div>
+    </div>
+    <button id="gwTiltBtn" class="is-hidden">Povolit náklon telefonu</button>
+  </div>
+</div>
+
 <div id="corner">vlastní 3D scéna &middot; <b>WebGL</b></div>
 
 <script src="js/crystal.js"></script>
 <script src="js/curve.js"></script>
 <script src="js/politician.js"></script>
 <script src="js/crossing.js"></script>
+<script src="js/getaway.js"></script>
 <script src="js/game-switch.js"></script>
 </body>
 </html>
