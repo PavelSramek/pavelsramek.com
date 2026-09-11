@@ -18,18 +18,62 @@
   var leftBtn = document.getElementById('gwLeftBtn');
   var rightBtn = document.getElementById('gwRightBtn');
 
-  // "Unikovka z Plzne" - nekonecny dodger s naklonem telefonu (styl Flappy
-  // Bird / Doodle Jump). Auto samo jede mestem, hrac uhyba vlevo/vpravo
-  // pred tim, co bezna cesta obvodem prinasi. Prekazky padaji shora dolu,
-  // hrac je ridi naklonem (primarni ovladani), tazenim prstu/mysi nebo
-  // sipkami (fallback pro desktop / bez povoleneho senzoru).
+  // "Unikovka z Plzne" - hra se 3 pevnymi pruhy (na zadost uzivatele
+  // 10. 9. 2026, 3. kolo: "prekazky jezdi ve 3 sloupcich a auticko ma
+  // preddefinovanou pozici taky ve 3 sloupcich"). Auto i prekazky se
+  // pohybuji jen mezi 3 pevnymi pozicemi (LANE_X nize, presne uprostred
+  // vizualnich delicich car v .gw-road), NE uz volne po celym rozsahu
+  // silnice jako driv. Prechod mezi pruhy je porad PLYNULY (viz
+  // PLAYER_MAX_SPEED nize, z 2. kola oprav) - jen CIL pohybu (playerTargetX)
+  // je ted vzdy jedna ze 3 hodnot LANE_X, misto libovolneho bodu pod prstem.
   //
+  // DULEZITA OPRAVA SOUROADNICOVEHO SYSTEMU: #gwPlayer byl puvodne DOM
+  // potomek #gwField (ne #gwRoad jako prekazky), takze jeho "left: X%" se
+  // pocitalo relativne k SIRCE FIELDU (100%), zatimco cislo playerX/
+  // playerTargetX v JS je (a vzdy bylo) "0..100 % napric SILNICI" - presne
+  // ta sama skala, jakou pouzivaji prekazky (ty jsou DOM potomci #gwRoad).
+  // Protoze .gw-road je uvnitr .gw-field zuzena o obrubniky (9 % na kazde
+  // strane), field je o cca 22 % sirsi nez silnice - auto se tak driv
+  // vizualne posouvalo o 22 % dal, nez odpovidalo jeho skutecne logicke
+  // pozici (kolizni matematika uz ale byla spravne, jen vykresleni bylo
+  // mimo). Pri volnem pohybu po cele silnici to nebylo vidět (stred pole i
+  // stred silnice vychazi na stejnych 50 %, takze chyba byla znatelna jen
+  // na krajich), ale u pevnych pruhu presne zarovnanych na delici cary by
+  // auto vubec nesedelo uprostred pruhu. Oprava: #gwPlayer se pri startu
+  // skriptu prevesi (appendChild) z #gwField do #gwRoad, takze jeho "left"
+  // je od teď spocitane ve stejne souradnicove soustave jako u prekazek a
+  // jako delici cary v CSS.
+  roadEl.appendChild(playerEl);
+
   // PLAYER_Y musi souhlasit s CSS "top" hodnotou #gwPlayer v getaway.css -
   // hrac se vertikalne nehybe, jen horizontalne.
   var PLAYER_Y = 86;
   var PLAYER_HALF_W = 6.2;
   var PLAYER_HALF_H = 6;
   var OBST_HALF_H = 6;
+
+  // 3 pevne pruhy, stredy presne uprostred kazde tretiny silnice (delici
+  // cary v .gw-road::before/::after jsou na road-relativnich 33.3 % a
+  // 66.6 % - tohle jsou stredy mezi nimi/kraji). Cislo v poli je index
+  // pruhu (0 = levy, 1 = stredni, 2 = pravy).
+  var LANE_COUNT = 3;
+  var LANE_X = [100 / 6, 50, 500 / 6]; // 16.667, 50, 83.333
+
+  // Max rychlost, kterou se auto muze horizontalne pohybovat, v procentech
+  // sirky silnice za sekundu - ted uz jen mezi 3 pevnymi pozicemi LANE_X,
+  // driv mezi libovolnym bodem pod prstem/naklonem. Drive se pozice
+  // dobihala k cili exponencialnim tlumenim (playerX += (target-playerX)
+  // *10*dt) SOUCASNE s CSS transition (transition:left .05s linear na
+  // .gw-player v getaway.css) - obe bezely najednou a soutezily o to, kdo
+  // "vyhraje" hodnotu left mezi snimky, coz na realnem telefonu vypadalo
+  // jako trhane preskakovani mezi par pozicemi (uzivatel to popsal jako
+  // "prijizdi ve 3 sloupcich, auto na pruh preskoci"), i kdyz tehdy zadne
+  // skutecne pruhy v datech nebyly - auto se melo pohybovat volne. Reseni:
+  // CSS transition uplne pryc (viz getaway.css) a pohyb reseny jen tady,
+  // jednou, konstantni rychlosti. Ted, kdyz uz jsou pruhy realne (3. kolo,
+  // na zadost uzivatele), presne tahle konstantni rychlost je to, co dela
+  // prechod mezi pruhy plynulym slidem mista neyplym skokem/teleportem.
+  var PLAYER_MAX_SPEED = 150;
 
   var OBST_TYPES = [
     { id:'closure',  emoji:'🚧', label:'uzavírka',        width:20,
@@ -79,10 +123,11 @@
   var LIVES_START = 3;
   var score = 0;
   var elapsed = 0;
-  var playerX = 50;        // 0..100, percent across #gwRoad
-  var playerTargetX = 50;
+  var playerLane = 1;         // 0..LANE_COUNT-1, start ve stredovem pruhu
+  var playerX = LANE_X[1];    // 0..100, percent across #gwRoad - vzdy == LANE_X[playerLane] jako cil
+  var playerTargetX = LANE_X[1];
   var invulnUntil = 0;
-  var obstacles = [];      // { type, x, y, el }
+  var obstacles = [];      // { type, x, lane, y, el }
   var spawnAcc = 0;
   var captionTimer = null;
 
@@ -117,10 +162,34 @@
     obstacles = [];
   }
 
-  function spawnObstacle(){
+  // Vrati mnozinu pruhu, ktere jsou "v tuto chvili relevantni" - obsazene
+  // prekazkou blizko horniho okraje. Protoze vsechny prekazky padaji
+  // stejnou rychlosti kazdy snimek (fallSpeed je sdileny), rozestup mezi
+  // dvema uz existujicimi prekazkami zustava od okamziku druheho spawnu
+  // uz napořad konstantni - takze staci hlidat jen prekazky blizko vrcholu
+  // v okamziku noveho spawnu, dal uz se jejich vzajemny rozestup nezmeni.
+  function occupiedLanesNearTop(){
+    var occ = {};
+    for(var i = 0; i < obstacles.length; i++){
+      var o = obstacles[i];
+      if(o.y > -20 && o.y < 50) occ[o.lane] = true;
+    }
+    return occ;
+  }
+
+  // Vrati true, pokud se povedlo neco vygenerovat. Zaruceni "vzdy zustane
+  // aspon 1 volny pruh": pokud uz jsou v relevantni zone obsazene 2 ruzne
+  // pruhy, novy spawn se v tomhle kole preskoci (zkusi se znovu presne
+  // dalsi snimek, viz volani v tick()) - nikdy se nezvoli posledni volny
+  // pruh, protoze by to hrace zavrelo do nemozne situace.
+  function trySpawnObstacle(){
+    var occ = occupiedLanesNearTop();
+    var free = [];
+    for(var i = 0; i < LANE_COUNT; i++){ if(!occ[i]) free.push(i); }
+    if(free.length < 2) return false;
+    var lane = free[Math.floor(Math.random() * free.length)];
     var type = pick(OBST_TYPES);
-    var half = type.width / 2;
-    var x = half + Math.random() * (100 - type.width);
+    var x = LANE_X[lane];
     var el = document.createElement('div');
     el.className = 'gw-obstacle';
     el.style.width = type.width + '%';
@@ -130,7 +199,8 @@
     emojiSpan.textContent = type.emoji;
     el.appendChild(emojiSpan);
     roadEl.appendChild(el);
-    obstacles.push({ type: type, x: x, y: -14, el: el });
+    obstacles.push({ type: type, x: x, lane: lane, y: -14, el: el });
+    return true;
   }
 
   function onHit(o){
@@ -178,8 +248,9 @@
     lives = LIVES_START;
     score = 0;
     elapsed = 0;
-    playerX = 50;
-    playerTargetX = 50;
+    playerLane = 1;
+    playerX = LANE_X[playerLane];
+    playerTargetX = LANE_X[playerLane];
     spawnAcc = 0;
     invulnUntil = 0;
     tiltBaseline = null;
@@ -188,7 +259,7 @@
     scoreValueEl.textContent = '0';
     scoreBestEl.textContent = best;
     hideCaption();
-    playerEl.style.left = '50%';
+    playerEl.style.left = playerX + '%';
     playerEl.classList.remove('hit');
     startCard.classList.add('hidden');
     overCard.classList.add('hidden');
@@ -199,6 +270,10 @@
   retryTap.addEventListener('click', startRound);
 
   // ---------- controls: drag/tap (always available), keyboard (desktop), tilt (primary on mobile) ----------
+  // Vsechny 4 vrstvy ovladani ted dela jedno a to same: zvoli cilovy pruh
+  // (setLane/moveLane), NE uz libovolnou spojitou pozici. Plynuly prejezd
+  // mezi zvolenymi pruhy pak resi konstantni-rychlostni "dojezd" v tick()
+  // nize (beze zmeny od 2. kola oprav).
   function clamp01to100(v){ return Math.max(0, Math.min(100, v)); }
 
   function xFromClientX(clientX){
@@ -207,73 +282,90 @@
     return clamp01to100(((clientX - rect.left) / rect.width) * 100);
   }
 
+  function setLane(lane){
+    lane = Math.max(0, Math.min(LANE_COUNT - 1, lane));
+    playerLane = lane;
+    playerTargetX = LANE_X[lane];
+  }
+  function moveLane(dir){
+    if(!playing) return;
+    setLane(playerLane + dir);
+  }
+  function laneFromX(x){
+    var laneWidth = 100 / LANE_COUNT;
+    return Math.max(0, Math.min(LANE_COUNT - 1, Math.floor(x / laneWidth)));
+  }
+
   var dragging = false;
   fieldEl.addEventListener('pointerdown', function(e){
     if(!playing) return;
     dragging = true;
-    playerTargetX = xFromClientX(e.clientX);
+    setLane(laneFromX(xFromClientX(e.clientX)));
   });
   fieldEl.addEventListener('pointermove', function(e){
     if(!dragging) return;
-    playerTargetX = xFromClientX(e.clientX);
+    setLane(laneFromX(xFromClientX(e.clientX)));
   });
   window.addEventListener('pointerup', function(){ dragging = false; });
   window.addEventListener('pointercancel', function(){ dragging = false; });
 
-  // keyDir combines keyboard arrows (desktop) and the on-screen ◀/▶
-  // buttons (always visible, primary control on devices without/before
-  // tilt) into one continuous steering input, same convention as Zatáčka's
-  // ctrl-btn cluster.
-  var keyLeft = false, keyRight = false;
-  var btnLeft = false, btnRight = false;
-  var keyDir = 0;
-  var KEY_SPEED = 90; // percent/s
-  function updateDir(){
-    keyDir = ((keyRight || btnRight) ? 1 : 0) - ((keyLeft || btnLeft) ? 1 : 0);
-  }
+  // Sipky na klavesnici a ◀/▶ tlacitka na obrazovce: kazdy stisk = presun
+  // presne o jeden pruh (ne uz spojite drzeni jako driv - to davalo smysl
+  // jen pri volnem pohybu, u 3 pevnych pruhu je "tap = jeden pruh"
+  // prirozenejsi, stejny vzor jako Crossy Road/Frogger-style hry).
   window.addEventListener('keydown', function(e){
-    if(e.key === 'ArrowLeft'){ keyLeft = true; updateDir(); }
-    else if(e.key === 'ArrowRight'){ keyRight = true; updateDir(); }
-  });
-  window.addEventListener('keyup', function(e){
-    if(e.key === 'ArrowLeft'){ keyLeft = false; updateDir(); }
-    if(e.key === 'ArrowRight'){ keyRight = false; updateDir(); }
+    if(e.repeat) return; // ignorovat OS auto-repeat pri drzeni klavesy
+    if(e.key === 'ArrowLeft') moveLane(-1);
+    else if(e.key === 'ArrowRight') moveLane(1);
   });
 
-  function bindCtrlBtn(el, setHeld){
+  function bindCtrlBtn(el, dir){
     if(!el) return;
     function down(e){
       e.preventDefault();
-      setHeld(true);
       el.classList.add('active');
       try{ el.setPointerCapture(e.pointerId); }catch(err){}
-      updateDir();
+      moveLane(dir);
     }
     function up(e){
       e.preventDefault();
-      setHeld(false);
       el.classList.remove('active');
-      updateDir();
     }
     el.addEventListener('pointerdown', down);
     el.addEventListener('pointerup', up);
     el.addEventListener('pointercancel', up);
     el.addEventListener('pointerleave', up);
   }
-  bindCtrlBtn(leftBtn, function(v){ btnLeft = v; });
-  bindCtrlBtn(rightBtn, function(v){ btnRight = v; });
+  bindCtrlBtn(leftBtn, -1);
+  bindCtrlBtn(rightBtn, 1);
 
   // ---------- tilt (same iOS 13+ permission pattern as Kostka) ----------
   var tiltSupported = 'DeviceOrientationEvent' in window;
   var tiltBaseline = null;
-  var TILT_RANGE = 22; // degrees of tilt to swing fully across the road
+  // Naklon uz taky jen voli jeden ze 3 pruhu, ne spojitou pozici. Dva prahy
+  // misto jednoho kvuli hystereze: aby se pri naklonu presne na hranici
+  // pruh netrepal tam a zpet (mala chvenim ruky by jinak preskakovalo mezi
+  // sousednimi pruhy vickrat za sekundu). TILT_ENTER = jak moc se musi
+  // naklonit ze STREDOVEHO pruhu, aby se presunul do krajniho. TILT_EXIT =
+  // o kolik min se musi narovnat zpet, aby se z krajniho pruhu vratil do
+  // stredu - vzdy mensi nez ENTER, takze mezi nimi je pasmo bez zmeny.
+  var TILT_ENTER = 10; // stupne
+  var TILT_EXIT = 4;   // stupne
 
   function handleOrientation(e){
     if(e.gamma === null) return;
     if(tiltBaseline === null){ tiltBaseline = e.gamma; return; }
     var d = e.gamma - tiltBaseline;
-    var t = Math.max(-1, Math.min(1, d / TILT_RANGE));
-    playerTargetX = 50 + t * 50;
+    var lane = playerLane;
+    if(lane === 1){
+      if(d <= -TILT_ENTER) lane = 0;
+      else if(d >= TILT_ENTER) lane = 2;
+    } else if(lane === 0){
+      if(d > -TILT_EXIT) lane = 1;
+    } else if(lane === 2){
+      if(d < TILT_EXIT) lane = 1;
+    }
+    setLane(lane);
   }
 
   function startTilt(){
@@ -314,10 +406,13 @@
     if(active && playing){
       elapsed += dt;
 
-      if(keyDir !== 0){
-        playerTargetX = clamp01to100(playerTargetX + keyDir * KEY_SPEED * dt);
-      }
-      playerX += (playerTargetX - playerX) * Math.min(1, 10 * dt);
+      // Konstantni-rychlostni "dojezd" k playerTargetX (viz PLAYER_MAX_SPEED
+      // vyse) - ted vzdy jede k jedne ze 3 hodnot LANE_X, takze tohle je to,
+      // co dela prejezd mezi pruhy plynulym slidem, ne teleportem/skokem.
+      var dx = playerTargetX - playerX;
+      var maxStep = PLAYER_MAX_SPEED * dt;
+      if(Math.abs(dx) <= maxStep){ playerX = playerTargetX; }
+      else{ playerX += (dx > 0 ? 1 : -1) * maxStep; }
       playerEl.style.left = playerX + '%';
 
       var fallSpeed = Math.min(MAX_FALL, BASE_FALL + elapsed * FALL_RAMP);
@@ -325,8 +420,10 @@
 
       spawnAcc += dt * 1000;
       if(spawnAcc >= spawnEvery){
-        spawnAcc = 0;
-        spawnObstacle();
+        if(trySpawnObstacle()) spawnAcc = 0;
+        // else: vsechny volne pruhy by se timhle spawnem zaplnily - preskocit
+        // tohle kolo, zkusit znovu presne dalsi snimek (spawnAcc zustava nad
+        // prahem), dokud se nejaky pruh neuvolni.
       }
 
       for(var i = obstacles.length - 1; i >= 0; i--){

@@ -112,7 +112,15 @@
   transform:translate(-50%, -50%);
   font-size:clamp(1.6rem, 8vw, 2.3rem);
   filter:drop-shadow(0 0 6px rgba(255,201,60,0.35)) drop-shadow(0 4px 6px rgba(0,0,0,0.5));
-  transition:left .05s linear;
+  /* NO "transition:left" here on purpose - getaway.js already recomputes
+     and writes .style.left every animation frame (~60fps) with its own
+     constant-speed easing (see PLAYER_MAX_SPEED in getaway.js). A CSS
+     transition on the same property, re-triggered every ~16ms by that JS
+     write, fights the JS animation instead of adding to it and produced a
+     visibly jerky "snap between a few spots" look on real phones - reported
+     as "auto vzdy na pruh preskoci", even though the underlying position is
+     fully continuous. If motion ever needs smoothing again, do it in
+     getaway.js's own tick(), not via a competing CSS transition. */
   pointer-events:none;
   z-index:3;
 }
@@ -124,7 +132,6 @@
   50%, 100%{opacity:.25;}
 }
 @media (prefers-reduced-motion: reduce){
-  .gw-player{transition:none;}
   .gw-player.hit{animation:none;opacity:.6;}
 }
 
@@ -174,13 +181,16 @@
 .gw-overcard .rank-final{font-size:.85rem;color:#fff;font-weight:600;margin-top:-4px;max-width:300px;}
 
 .gw-ctrl-btn{
-  /* upper-third on the sides — not true mid-height (50%), because the
-     sitewide #gameSwitch pill (game-switch.js, shared across all games)
-     is fixed at top:50%;right:14px and would sit right on top of a
-     mid-height right button. .gw-hud (bottom-left) and #gwTiltBtn
-     (bottom-center) own the bottom row, .gw-score-box owns the top-right,
-     so top:32% is the one spot that clears all of them. */
-  position:fixed;top:32%;transform:translateY(-50%);z-index:6;
+  /* lower on the sides (top:64%) - below the sitewide #gameSwitch pill
+     (game-switch.js, shared across all games, fixed at top:50%;right:14px,
+     ~40px tall), with a safety margin, but still clear of the bottom row
+     owned by .gw-hud (bottom-left) and #gwTiltBtn (bottom-center): both
+     ctrl buttons sit far enough to the sides (left:10px / right:10px) that
+     they never overlap the centered tilt button regardless of vertical
+     position, so the only real constraint was staying below the
+     game-switch pill. Moved down from top:32% on 10. 9. 2026 per user
+     feedback - closer to natural thumb reach in a driving game. */
+  position:fixed;top:64%;transform:translateY(-50%);z-index:6;
   width:60px;height:60px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
   font-size:1.3rem;color:#fff;border:none;
