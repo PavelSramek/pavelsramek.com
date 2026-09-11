@@ -58,7 +58,7 @@
   });
 
   // ---------- tunables ----------
-  var SPEED = 130;      // px/s
+  var SPEED = 95;       // px/s (slowed down 11. 9. 2026 from 130, on request)
   var TURN_RATE = 3.1;  // rad/s while a turn button is held
   var TRAIL_WIDTH = 5;
   var HEAD_RADIUS = 5;
@@ -312,13 +312,18 @@
   }
   document.querySelectorAll('.ctrl-cluster.p1 .left').forEach(function(el){ bindButton(el, 'p1', 'left'); });
   document.querySelectorAll('.ctrl-cluster.p1 .right').forEach(function(el){ bindButton(el, 'p1', 'right'); });
-  // P2's whole cluster is CSS-rotated 180° so it reads right-side-up from
-  // across the table — but that rotation also flips each button's glyph
-  // (the ◀ visually becomes a ▶ once spun around). Bind by what the arrow
-  // ends up POINTING AT after rotation, not by its unrotated class name,
-  // otherwise the arrow you see and the turn you get don't match.
-  document.querySelectorAll('.ctrl-cluster.p2 .left').forEach(function(el){ bindButton(el, 'p2', 'right'); });
-  document.querySelectorAll('.ctrl-cluster.p2 .right').forEach(function(el){ bindButton(el, 'p2', 'left'); });
+  // P2's whole cluster is CSS-rotated 180° so it reads right-side-up for
+  // the person sitting across the table. That single rotation flips BOTH
+  // the glyph AND the left/right screen position together, and those two
+  // flips cancel out from that seated player's own point of view — from
+  // their seat, the ".left" button still ends up on their left, still
+  // showing ◀, same as p1. So bind each button straight, no swap.
+  // (An earlier version swapped these on the assumption that only the
+  // glyph flips, which made the arrow a player pressed and the turn the
+  // snake made run backwards for whoever sits across the table — fixed
+  // 11. 9. 2026 after the user confirmed the mix-up in real 2-player play.)
+  document.querySelectorAll('.ctrl-cluster.p2 .left').forEach(function(el){ bindButton(el, 'p2', 'left'); });
+  document.querySelectorAll('.ctrl-cluster.p2 .right').forEach(function(el){ bindButton(el, 'p2', 'right'); });
 
   // ---------- keyboard: every "key" scheme in PLAYER_SCHEMES, always on ----------
   // (harmless on phones — kept as-is from before this feature, just

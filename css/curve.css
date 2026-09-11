@@ -27,20 +27,23 @@ body{
 #scoreList .sep{color:var(--muted);margin:0 2px;}
 #scoreboard .round{color:var(--muted);margin-left:6px;}
 
+/* centered (not edge-pinned) so the buttons clear both the top-left
+   "back to pavelsramek.com" link and the score pill above them — moved
+   here 11. 9. 2026, they used to sit flush against the screen edges */
 .ctrl-cluster{
   position:fixed;left:0;right:0;
-  display:flex;justify-content:space-between;
-  padding:0 5vw;z-index:5;
+  display:flex;justify-content:center;align-items:center;
+  gap:64px;z-index:5;
   pointer-events:none;
 }
-.ctrl-cluster.p1{top:16px;}
+.ctrl-cluster.p1{top:66px;} /* clears the score pill (top:14px) above it */
 .ctrl-cluster.p2{bottom:16px;transform:rotate(180deg);}
 
 .ctrl-btn{
   pointer-events:auto;
-  width:72px;height:72px;border-radius:20px;
+  width:88px;height:88px;border-radius:24px; /* bigger tap target, 11. 9. 2026 (was 72px) */
   display:flex;align-items:center;justify-content:center;
-  font-size:1.5rem;color:#fff;border:none;
+  font-size:1.8rem;color:#fff;border:none;
   -webkit-tap-highlight-color:transparent;
   touch-action:none;cursor:pointer;
   transition:transform .1s ease, filter .1s ease;
