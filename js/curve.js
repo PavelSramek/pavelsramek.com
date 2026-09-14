@@ -310,20 +310,24 @@
     el.addEventListener('pointerup', up);
     el.addEventListener('pointercancel', up);
   }
-  document.querySelectorAll('.ctrl-cluster.p1 .left').forEach(function(el){ bindButton(el, 'p1', 'left'); });
-  document.querySelectorAll('.ctrl-cluster.p1 .right').forEach(function(el){ bindButton(el, 'p1', 'right'); });
-  // P2's whole cluster is CSS-rotated 180° so it reads right-side-up for
-  // the person sitting across the table. That single rotation flips BOTH
-  // the glyph AND the left/right screen position together, and those two
-  // flips cancel out from that seated player's own point of view — from
-  // their seat, the ".left" button still ends up on their left, still
-  // showing ◀, same as p1. So bind each button straight, no swap.
-  // (An earlier version swapped these on the assumption that only the
-  // glyph flips, which made the arrow a player pressed and the turn the
-  // snake made run backwards for whoever sits across the table — fixed
-  // 11. 9. 2026 after the user confirmed the mix-up in real 2-player play.)
-  document.querySelectorAll('.ctrl-cluster.p2 .left').forEach(function(el){ bindButton(el, 'p2', 'left'); });
-  document.querySelectorAll('.ctrl-cluster.p2 .right').forEach(function(el){ bindButton(el, 'p2', 'right'); });
+  // On-screen touch buttons, both players (14. 9. 2026): bound CROSSED —
+  // the DOM/CSS ".left" button (showing ◀, physically on the left of its
+  // cluster) triggers the "right" turn key, and vice versa. This looks
+  // backwards on paper, but two rounds of real 2-player play on an actual
+  // phone (11. 9. and 14. 9. 2026) confirmed the straight binding felt
+  // reversed for BOTH players, not just p2 — a player sitting at a flat
+  // phone on a table, looking down at their own edge's buttons, reads
+  // "which way the snake turns" by which side of the SCREEN the snake's
+  // path curves toward from their seat, not by the abstract left/right
+  // math-angle convention the glyphs were bound to. Do not "fix" this back
+  // to a straight binding based on geometric reasoning alone — the direct
+  // binding was tried twice and reported backwards both times in real
+  // play; if this ever needs revisiting, re-verify with the user actually
+  // playing on a phone, not by re-deriving the rotation on paper.
+  document.querySelectorAll('.ctrl-cluster.p1 .left').forEach(function(el){ bindButton(el, 'p1', 'right'); });
+  document.querySelectorAll('.ctrl-cluster.p1 .right').forEach(function(el){ bindButton(el, 'p1', 'left'); });
+  document.querySelectorAll('.ctrl-cluster.p2 .left').forEach(function(el){ bindButton(el, 'p2', 'right'); });
+  document.querySelectorAll('.ctrl-cluster.p2 .right').forEach(function(el){ bindButton(el, 'p2', 'left'); });
 
   // ---------- keyboard: every "key" scheme in PLAYER_SCHEMES, always on ----------
   // (harmless on phones — kept as-is from before this feature, just
