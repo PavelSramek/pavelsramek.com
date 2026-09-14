@@ -131,7 +131,7 @@ body{
 .game-switch:active{transform:translateY(-50%) scale(0.94);}
 
 @media (max-width:420px){
-  .game-switch{font-size:.76rem;padding:10px 14px;}
+  .game-switch{font-size:.76rem;padding:10px 14px;top:155px;}
 }
 
 @media (prefers-reduced-motion: reduce){
