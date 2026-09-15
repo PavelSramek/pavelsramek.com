@@ -186,6 +186,117 @@
     ctx.restore();
   }
 
+  // ---------- flat hand-drawn face icons ----------
+  // Emoji rendered via canvas fillText is unreliable across browsers/OSes
+  // (some render color emoji as plain monochrome outline glyphs), so each
+  // face gets a small custom flat-color pictogram instead, built entirely
+  // from canvas primitives — no font/emoji dependency, same result everywhere.
+  function roundedRectPath(ctx, x, y, w, h, r){
+    if(typeof r === 'number') r = { tl: r, tr: r, br: r, bl: r };
+    ctx.beginPath();
+    ctx.moveTo(x + r.tl, y);
+    ctx.lineTo(x + w - r.tr, y);
+    ctx.arcTo(x + w, y, x + w, y + r.tr, r.tr);
+    ctx.lineTo(x + w, y + h - r.br);
+    ctx.arcTo(x + w, y + h, x + w - r.br, y + h, r.br);
+    ctx.lineTo(x + r.bl, y + h);
+    ctx.arcTo(x, y + h, x, y + h - r.bl, r.bl);
+    ctx.lineTo(x, y + r.tl);
+    ctx.arcTo(x, y, x + r.tl, y, r.tl);
+    ctx.closePath();
+  }
+  function fillRoundedRect(ctx, x, y, w, h, r, color){
+    ctx.save();
+    ctx.fillStyle = color;
+    roundedRectPath(ctx, x, y, w, h, r);
+    ctx.fill();
+    ctx.restore();
+  }
+  function fillCircle(ctx, cx, cy, r, color){
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+  function fillTriangle(ctx, x1, y1, x2, y2, x3, y3, color){
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.lineTo(x3, y3);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawFaceIcon(ctx, id, cx, cy, s){
+    if(id === 'young'){
+      fillRoundedRect(ctx, cx - s * 0.32, cy + s * 0.55, s * 0.22, s * 0.42, s * 0.08, '#e0a83e');
+      fillRoundedRect(ctx, cx + s * 0.10, cy + s * 0.55, s * 0.22, s * 0.42, s * 0.08, '#e0a83e');
+      fillRoundedRect(ctx, cx - s * 0.42, cy - s * 0.08, s * 0.84, s * 0.65, s * 0.22, '#ffd166');
+      fillCircle(ctx, cx, cy - s * 0.42, s * 0.36, '#ffe3c4');
+    } else if(id === 'office'){
+      ctx.save();
+      ctx.fillStyle = '#dfe6ff';
+      ctx.beginPath();
+      ctx.moveTo(cx - s * 0.62, cy + s * 0.28);
+      ctx.lineTo(cx + s * 0.62, cy + s * 0.28);
+      ctx.lineTo(cx + s * 0.48, cy + s * 0.44);
+      ctx.lineTo(cx - s * 0.48, cy + s * 0.44);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+      fillRoundedRect(ctx, cx - s * 0.5, cy - s * 0.62, s * 1.0, s * 0.9, s * 0.08, '#1c2440');
+      ctx.save();
+      ctx.strokeStyle = '#5eead4';
+      ctx.lineWidth = s * 0.05;
+      ctx.lineCap = 'round';
+      [[-0.32, 0.62], [-0.10, 0.42], [0.12, 0.5]].forEach(function(row){
+        ctx.beginPath();
+        ctx.moveTo(cx - s * 0.34, cy + s * row[0]);
+        ctx.lineTo(cx - s * 0.34 + s * row[1], cy + s * row[0]);
+        ctx.stroke();
+      });
+      ctx.restore();
+    } else if(id === 'green'){
+      fillRoundedRect(ctx, cx - s * 0.08, cy + s * 0.15, s * 0.16, s * 0.55, s * 0.05, '#7a4b2a');
+      fillCircle(ctx, cx - s * 0.28, cy - s * 0.05, s * 0.34, '#8fe3b0');
+      fillCircle(ctx, cx + s * 0.28, cy - s * 0.05, s * 0.34, '#8fe3b0');
+      fillCircle(ctx, cx, cy - s * 0.32, s * 0.40, '#4fbf7f');
+      fillCircle(ctx, cx, cy - s * 0.10, s * 0.30, '#2f7a52');
+    } else if(id === 'traffic'){
+      fillRoundedRect(ctx, cx - s * 0.62, cy + s * 0.02, s * 1.24, s * 0.4, s * 0.14, '#ffcf5c');
+      fillRoundedRect(ctx, cx - s * 0.32, cy - s * 0.30, s * 0.64, s * 0.36, { tl: s * 0.18, tr: s * 0.18, br: 0, bl: 0 }, '#ffcf5c');
+      fillRoundedRect(ctx, cx - s * 0.26, cy - s * 0.24, s * 0.24, s * 0.24, s * 0.05, '#cfe8ff');
+      fillRoundedRect(ctx, cx + s * 0.02, cy - s * 0.24, s * 0.24, s * 0.24, s * 0.05, '#cfe8ff');
+      fillCircle(ctx, cx - s * 0.36, cy + s * 0.40, s * 0.17, '#14151a');
+      fillCircle(ctx, cx + s * 0.36, cy + s * 0.40, s * 0.17, '#14151a');
+      fillCircle(ctx, cx - s * 0.36, cy + s * 0.40, s * 0.07, '#6b7280');
+      fillCircle(ctx, cx + s * 0.36, cy + s * 0.40, s * 0.07, '#6b7280');
+    } else if(id === 'housing'){
+      fillRoundedRect(ctx, cx - s * 0.42, cy - s * 0.02, s * 0.84, s * 0.6, s * 0.06, '#fff3d6');
+      fillTriangle(ctx, cx - s * 0.55, cy - s * 0.02, cx, cy - s * 0.55, cx + s * 0.55, cy - s * 0.02, '#7a3b1e');
+      fillRoundedRect(ctx, cx - s * 0.12, cy + s * 0.18, s * 0.24, s * 0.4, { tl: s * 0.08, tr: s * 0.08, br: 0, bl: 0 }, '#7a3b1e');
+      fillRoundedRect(ctx, cx + s * 0.12, cy + s * 0.05, s * 0.2, s * 0.2, s * 0.04, '#bfe3ff');
+    } else if(id === 'brand'){
+      fillRoundedRect(ctx, cx - s * 0.48, cy - s * 0.58, s * 0.96, s * 1.16, s * 0.16, '#f5f0e6');
+      var pipColors = ['#9b3fae', '#3a2f7d', '#1f6b46', '#2f5d7d', '#ae7b3f', '#0b0e16'];
+      var pr = s * 0.10;
+      var px = [cx - s * 0.22, cx + s * 0.22];
+      var py = [cy - s * 0.32, cy, cy + s * 0.32];
+      var idx = 0;
+      py.forEach(function(y){
+        px.forEach(function(x){
+          fillCircle(ctx, x, y, pr, pipColors[idx % pipColors.length]);
+          idx++;
+        });
+      });
+    }
+  }
+
   function makeFaceTexture(face){
     var size = 512;
     var canvas = document.createElement('canvas');
@@ -211,8 +322,7 @@
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    ctx.font = '148px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
-    ctx.fillText(face.emoji, size / 2, size * 0.35);
+    drawFaceIcon(ctx, face.id, size / 2, size * 0.35, 110);
 
     ctx.fillStyle = '#fff';
     ctx.font = face.kind === 'brand' ? '700 42px Inter, sans-serif' : '700 48px Inter, sans-serif';

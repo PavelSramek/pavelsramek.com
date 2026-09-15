@@ -58,7 +58,15 @@
   });
 
   // ---------- tunables ----------
-  var SPEED = 95;       // px/s (slowed down 11. 9. 2026 from 130, on request)
+  // SPEED is px/s in CSS-pixel canvas space (see resize(): canvas is sized to
+  // window.innerWidth/innerHeight). That's an ABSOLUTE speed, not relative to
+  // screen size — so the same number covers a much bigger fraction of a
+  // phone's ~400px-wide screen per second than of a PC's ~1500-2000px-wide
+  // window, which is why one shared constant felt noticeably faster on
+  // mobile than on desktop even though it was numerically identical (report
+  // 15. 9. 2026). Split by device instead of changing the shared value, so
+  // mobile feel (already tuned 11. 9. 2026, slowed from 130) is untouched.
+  var SPEED = isDesktop ? 118 : 95;  // px/s (desktop bumped 15. 9. 2026, on request)
   var TURN_RATE = 3.1;  // rad/s while a turn button is held
   var TRAIL_WIDTH = 5;
   var HEAD_RADIUS = 5;
