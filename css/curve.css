@@ -130,7 +130,11 @@ body{
 }
 .game-switch:active{transform:translateY(-50%) scale(0.94);}
 
-@media (max-width:420px){
+/* Mobilní poloha přepínače: 540px, ne 420px — dnešní velké telefony mají
+   430 až 440 CSS px šířky (iPhone Pro Max a spol.) a při původním prahu na ně
+   platilo desktopové top:50%, tzn. pill ležel přesně přes hrací pole
+   a instrukční text uprostřed obrazovky. */
+@media (max-width:540px){
   .game-switch{font-size:.76rem;padding:10px 14px;top:155px;}
 }
 

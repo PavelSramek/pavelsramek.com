@@ -1,0 +1,185 @@
+/* Česká sodovka — satirický generátor zpráv.
+   Sdílené základy (paleta :root, html/body, #backlink, #corner) nese
+   css/crystal.css, sdílený přepínač her .game-switch/.game-hidden nese
+   css/curve.css — oba se načítají na herních stránkách společně s tímhle. */
+
+#sodaRoot{position:fixed;inset:0;z-index:1;}
+
+.sd-stage{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;
+  gap:14px;padding:24px 16px 28px;
+  overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+}
+/* Centrování párem auto-marginů, ne justify-content:center — při obsahu
+   vyšším než viewport se auto margin sám vynuluje a karta zůstane celá
+   dostupná scrollem, kdežto justify-content:center by ji ořízl nahoře.
+   flex:0 0 auto je nutné, jinak flex karty smrští a overflow:hidden
+   uřízne delší titulek. */
+.sd-paper{flex:0 1 auto;min-height:0;margin-top:auto;}
+.sd-controls{flex:0 0 auto;margin-bottom:auto;}
+
+/* novinová karta */
+.sd-paper{
+  width:100%;max-width:520px;
+  display:flex;flex-direction:column;
+  background:linear-gradient(180deg, #fdfcf8 0%, #f4f1e8 100%);
+  color:#18141c;
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:0 26px 60px -22px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.06);
+}
+.sd-paper.is-fresh{animation:sd-pop .34s ease;}
+@keyframes sd-pop{
+  from{opacity:.25;transform:translateY(8px) scale(.985);}
+  to{opacity:1;transform:none;}
+}
+
+/* hlavička plátku */
+.sd-masthead{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px 16px;
+  background:linear-gradient(135deg, var(--purple), var(--pink));
+  color:#fff;
+}
+.sd-logo{
+  font-family:'Source Serif Pro',Georgia,serif;
+  font-weight:700;font-size:1.02rem;letter-spacing:.01em;
+}
+.sd-edition{
+  font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;
+  font-weight:700;opacity:.92;white-space:nowrap;
+}
+.sd-edition span{font-family:'SF Mono','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;letter-spacing:.04em;}
+
+/* fotka */
+/* Fotka je jediný prvek karty, který smí ustoupit: když je na obrazovku
+   málo místa (nízký viewport, delší titulek), ukrojí se z ní (object-fit:
+   cover ji jen víc ořízne) místo toho, aby se ořízl text nebo aby tlačítko
+   "Další zpráva" spadlo pod okraj obrazovky. Text i disclaimer mají
+   flex:0 0 auto, takže se nezmenšují nikdy. */
+.sd-figure{
+  position:relative;margin:0;background:#241c2b;aspect-ratio:1168/784;
+  flex:0 1 auto;min-height:88px;
+}
+.sd-masthead, .sd-body, .sd-note{flex:0 0 auto;}
+.sd-figure img{
+  display:block;width:100%;height:100%;object-fit:cover;
+  opacity:0;transition:opacity .28s ease;
+}
+.sd-figure img.is-loaded{opacity:1;}
+.sd-figure::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg, rgba(0,0,0,0.22) 0%, transparent 34%);
+}
+.sd-cat{
+  position:absolute;left:12px;top:12px;z-index:2;
+  font-size:.64rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:#fff;background:rgba(17,12,22,0.72);
+  border:1px solid rgba(255,255,255,0.22);
+  border-radius:999px;padding:4px 10px;
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+}
+.sd-ai{
+  position:absolute;right:10px;bottom:9px;z-index:2;
+  font-size:.58rem;letter-spacing:.06em;
+  color:rgba(255,255,255,0.86);text-shadow:0 1px 3px rgba(0,0,0,0.9);
+}
+
+/* text */
+.sd-body{padding:16px 18px 16px;}
+.sd-headline{
+  font-family:'Source Serif Pro',Georgia,serif;
+  font-size:1.14rem;line-height:1.34;font-weight:700;
+  margin:0;color:#18141c;
+}
+.sd-quote{
+  margin:13px 0 0;padding:11px 0 0;
+  border-top:1px solid rgba(24,20,28,0.13);
+}
+.sd-quote p{
+  margin:0;font-size:.95rem;line-height:1.45;color:#2c2431;font-style:italic;
+}
+.sd-quote cite{
+  display:block;margin-top:5px;font-style:normal;
+  font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;
+  font-weight:700;color:#8a3f6f;
+}
+.sd-note{
+  margin:0;padding:9px 18px 13px;
+  font-size:.64rem;line-height:1.45;color:#6d6675;
+  border-top:1px solid rgba(24,20,28,0.09);
+  background:rgba(24,20,28,0.035);
+}
+
+/* ovládání */
+.sd-controls{
+  display:flex;flex-direction:column;align-items:center;gap:7px;
+  width:100%;max-width:520px;
+}
+.sd-next{
+  appearance:none;-webkit-appearance:none;
+  border:none;cursor:pointer;
+  font-family:inherit;font-size:.98rem;font-weight:700;letter-spacing:.02em;
+  color:#fff;padding:14px 30px;border-radius:999px;
+  background:linear-gradient(135deg, var(--purple), var(--pink));
+  box-shadow:0 12px 26px -12px rgba(217,92,134,0.9);
+  transition:transform .12s ease, box-shadow .12s ease;
+}
+.sd-next:active{transform:scale(0.96);}
+/* mobil: celá karta musí zůstat pod sdílenou bublinou přepínače her
+   (.game-switch, css/curve.css — na mobilu fixní na top:155px, tzn. spodní
+   hrana kolem 175px), jinak pill leží přes fotku. */
+@media (max-width:540px){
+  /* Karta začíná pod sdílenou bublinou přepínače her (.game-switch,
+     css/curve.css — na mobilu fixní top:155px, spodní hrana ~172px),
+     jinak pill leží přes fotku. */
+  .sd-stage{padding:182px 14px 46px;gap:10px;}  /* 46px dole = rezerva pro sdílený #corner (tech credit, fixní vpravo dole) */
+  .sd-paper{margin-top:0;}
+  .sd-headline{font-size:1.02rem;line-height:1.3;}
+  .sd-quote{margin-top:11px;padding-top:9px;}
+  .sd-quote p{font-size:.88rem;}
+  .sd-body{padding:12px 15px;}
+  .sd-note{padding:7px 15px 11px;font-size:.62rem;}
+  .sd-masthead{padding:9px 14px;}
+  .sd-next{padding:13px 26px;font-size:.92rem;}
+}
+
+/* nízké displeje (starší/menší telefony na šířku obrazovky pod 640 px):
+   ještě o něco úspornější sazba, aby se i s nejdelším titulkem vešel
+   celý text i disclaimer */
+@media (max-width:540px) and (max-height:660px){
+  .sd-stage{padding:178px 12px 44px;gap:8px;}
+  .sd-headline{font-size:.97rem;line-height:1.28;}
+  .sd-quote{margin-top:9px;padding-top:8px;}
+  .sd-quote p{font-size:.84rem;}
+  .sd-quote cite{font-size:.68rem;}
+  .sd-body{padding:10px 13px;}
+  .sd-note{padding:6px 13px 9px;font-size:.58rem;line-height:1.4;}
+  .sd-figure{min-height:68px;}
+}
+
+/* nejmenší dnes reálně používané displeje (320x568 a spol.) */
+@media (max-width:360px) and (max-height:600px){
+  .sd-stage{padding:174px 10px 42px;gap:7px;}
+  .sd-headline{font-size:.92rem;line-height:1.26;}
+  .sd-quote p{font-size:.8rem;}
+  .sd-quote cite{font-size:.64rem;}
+  .sd-body{padding:9px 12px;}
+  .sd-note{padding:5px 12px 8px;font-size:.55rem;line-height:1.38;}
+  .sd-masthead{padding:7px 12px;}
+  .sd-logo{font-size:.94rem;}
+  .sd-figure{min-height:54px;}
+  .sd-next{padding:11px 22px;font-size:.88rem;}
+}
+
+@media (min-width:541px) and (max-height:700px){
+  .sd-stage{padding:16px 16px 18px;gap:10px;}
+}
+
+@media (prefers-reduced-motion: reduce){
+  .sd-paper.is-fresh{animation:none;}
+  .sd-figure img{transition:none;}
+  .sd-next{transition:none;}
+}

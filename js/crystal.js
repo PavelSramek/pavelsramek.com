@@ -586,9 +586,9 @@
     vel.z = 0;
     // throwing motion imparts spin perpendicular to the velocity direction —
     // like flicking a die, it tumbles in the direction it was thrown
-    angVel.x += -sampledVel.y * 0.4 / THROW_MASS;
-    angVel.y += sampledVel.x * 0.4 / THROW_MASS;
-    angVel.z += (sampledVel.x - sampledVel.y) * 0.09 / THROW_MASS;
+    angVel.x += -sampledVel.y * 0.72 / THROW_MASS;
+    angVel.y += sampledVel.x * 0.72 / THROW_MASS;
+    angVel.z += (sampledVel.x - sampledVel.y) * 0.16 / THROW_MASS;
 
     var releaseSpeed = Math.hypot(sampledVel.x, sampledVel.y);
     if(releaseSpeed > 0.4){

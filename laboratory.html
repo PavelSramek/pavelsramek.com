@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="css/politician.css">
 <link rel="stylesheet" href="css/crossing.css">
 <link rel="stylesheet" href="css/getaway.css">
+<link rel="stylesheet" href="css/soda.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
@@ -194,6 +195,33 @@
   </div>
 </div>
 
+<div id="sodaRoot" class="game-hidden">
+  <div class="sd-stage">
+    <article class="sd-paper" id="sodaPaper">
+      <header class="sd-masthead">
+        <span class="sd-logo">Česká sodovka</span>
+        <span class="sd-edition">satira &middot; <span id="sodaCounter">1 / 100</span></span>
+      </header>
+      <figure class="sd-figure">
+        <span class="sd-cat" id="sodaCat"></span>
+        <img id="sodaImg" alt="">
+        <span class="sd-ai">ilustrace generovaná AI</span>
+      </figure>
+      <div class="sd-body">
+        <h1 class="sd-headline" id="sodaHeadline"></h1>
+        <blockquote class="sd-quote">
+          <p id="sodaQuote"></p>
+          <cite id="sodaRole"></cite>
+        </blockquote>
+      </div>
+      <p class="sd-note">Satira. Zprávy, citace i fotografie jsou vymyšlené a generované AI. Podobnost s konkrétními lidmi nebo skutečnými událostmi není zamýšlená.</p>
+    </article>
+    <div class="sd-controls">
+      <button id="sodaNext" class="sd-next" type="button">Další zpráva</button>
+    </div>
+  </div>
+</div>
+
 <div id="corner">vlastní 3D scéna &middot; <b>WebGL</b></div>
 
 <script src="js/crystal.js"></script>
@@ -201,6 +229,7 @@
 <script src="js/politician.js"></script>
 <script src="js/crossing.js"></script>
 <script src="js/getaway.js"></script>
+<script src="js/soda.js"></script>
 <script src="js/game-switch.js"></script>
 </body>
 </html>
