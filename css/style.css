@@ -171,6 +171,29 @@ img { max-width: 100%; display: block; }
   margin: 4px auto;
 }
 
+/* ---------- Mini hry banner (nízký pruh pod hlavičkou, na všech
+   stránkách s hlavičkou kromě /follow) ---------- */
+.games-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(120deg, var(--purple), var(--pink), var(--orange));
+  color: #fff;
+  text-decoration: none;
+  padding: 10px 24px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-align: center;
+}
+.games-banner:hover { color: #fff; }
+.games-banner-arrow { transition: transform 0.15s ease; }
+.games-banner:hover .games-banner-arrow { transform: translateX(3px); }
+
+@media (max-width: 480px) {
+  .games-banner { font-size: 0.8rem; padding: 8px 16px; }
+}
+
 /* ---------- Buttons ---------- */
 .btn {
   display: inline-flex;
