@@ -143,4 +143,9 @@
   });
 
   apply();
+
+  // Menu se otevírá hned při příchodu na stránku (16. 9. 2026, na žádost
+  // uživatele) — návštěvník tak hned vidí, kolik her je a jak se jmenují,
+  // bez nutnosti nejdřív kliknout na tlačítko.
+  openMenu();
 })();
