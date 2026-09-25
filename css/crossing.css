@@ -93,26 +93,33 @@
 }
 
 .cx-road{
+  position:relative;
   display:flex;flex-direction:column;
+  /* real photo of the actual crosswalk paint (user-supplied reference,
+     25. 9. 2026), applied to this PARENT container spanning all 7 lanes,
+     not per-lane -- a single photo stretched onto one narrow lane
+     (aspect ratio ~8:1) turns its circles into ellipses, see the lesson
+     in the project doc. background-size:cover keeps the photo's own
+     aspect ratio (no stretch-distortion) and just crops to fill. */
+  background:url('../img/crossing-road.jpg') center / cover no-repeat, #2b2c30;
 }
-
 .cx-lane{
   position:relative;
   height:clamp(32px, 6.5vh, 44px);
-  background:
-    repeating-linear-gradient(90deg, rgba(255,255,255,0.35) 0 18px, transparent 18px 34px) bottom / 100% 3px no-repeat,
-    #33363f;
-  border-bottom:1px solid rgba(0,0,0,0.25);
+  background:transparent;
+  border-bottom:1px solid rgba(0,0,0,0.3);
   overflow:hidden;
 }
-.cx-lane:nth-child(even){ background-color:#3a3d47; }
 .cx-lane.is-current{
   /* the ONE lane Aleš is actually standing in right now — horizontal
      counterpart to .cx-corridor below. Where the two overlap is the exact
      cell a vehicle has to enter to be dangerous this instant; traffic in
-     any other lane, even the one right next to it, can't touch him. */
-  box-shadow:inset 0 0 0 1px rgba(255,201,60,0.45);
-  background-color:rgba(255,201,60,0.07);
+     any other lane, even the one right next to it, can't touch him.
+     Road background is the photo (mostly dark asphalt, 25. 9. 2026) --
+     a bright gold tint/border reads clearly against that, same as the
+     original pre-cheese design. */
+  box-shadow:inset 0 0 0 2px rgba(255,201,60,0.6);
+  background-color:rgba(255,201,60,0.14);
 }
 
 .cx-vehicle{
@@ -150,11 +157,12 @@
      crossing.js, which also sets this element's left/width so the two
      never drift apart. Runs behind the vehicles/player, in front of the
      lane backgrounds, so the "real" danger zone in each lane (not just
-     the one Aleš is currently on) reads at a glance. */
+     the one Aleš is currently on) reads at a glance. White dashed
+     border/tint (25. 9. 2026) against the mostly-dark photo road. */
   position:absolute;top:0;bottom:0;z-index:0;
-  background:rgba(255,255,255,0.05);
-  border-left:1px dashed rgba(255,255,255,0.2);
-  border-right:1px dashed rgba(255,255,255,0.2);
+  background:rgba(255,255,255,0.06);
+  border-left:1px dashed rgba(255,255,255,0.35);
+  border-right:1px dashed rgba(255,255,255,0.35);
   pointer-events:none;
 }
 
