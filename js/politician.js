@@ -138,6 +138,9 @@
   var spawnCooldown = 900;
   var scoreBump = 0;
   var bossEnteredAt = 0; // performance.now() timestamp when rankIndex first hit BOSS_INDEX this round, 0 = not yet
+  var milestoneShowing = false; // true while the rank-up/milestone card is on screen; pauses zone
+  // countdowns and new spawns so a bubble never silently expires (or spawns)
+  // hidden behind the opaque milestone card (nahlášeno uživatelem 1. 10. 2026).
 
   // Boss level (the last rank, Roman Zarzycký) is a deliberate difficulty
   // spike on top of the normal curve below: every zone slot is used at
@@ -266,7 +269,11 @@
     milestoneQuipEl.classList.toggle('is-hidden', !rank.quip);
     milestoneEl.classList.toggle('boss', !!rank.boss);
     milestoneEl.classList.add('show');
-    setTimeout(function(){ milestoneEl.classList.remove('show'); }, rank.boss ? 3200 : 2000);
+    milestoneShowing = true;
+    setTimeout(function(){
+      milestoneEl.classList.remove('show');
+      milestoneShowing = false;
+    }, rank.boss ? 3200 : 2000);
   }
 
   function checkRankUp(){
@@ -358,6 +365,7 @@
     lives = 3;
     rankIndex = 0;
     bossEnteredAt = 0;
+    milestoneShowing = false;
     spawnCooldown = 700;
     scoreValueEl.textContent = 0;
     scoreBestEl.textContent = highScore;
@@ -406,7 +414,7 @@
     var dt = Math.min(now - last, 1000 / 30);
     last = now;
 
-    if(active && playing){
+    if(active && playing && !milestoneShowing){
       zones.forEach(function(z){
         if(z.state === 'active'){
           z.timeLeft -= dt;
