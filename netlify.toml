@@ -11,16 +11,6 @@
 # 404.html is served automatically by Netlify for unmatched routes —
 # no redirect rule needed.
 
-# Explicit clean-URL redirect for the QR-code transparency page — printed
-# materials point to pavelsramek.com/transparence (no .html), so this rule
-# is kept even though Netlify's default clean-URL handling would likely
-# already serve it, since printed QR codes cannot be reissued if that
-# assumption ever turns out wrong.
-[[redirects]]
-  from = "/transparence"
-  to = "/transparence.html"
-  status = 200
-
 # Explicit clean-URL redirect for the QR-code "follow me" page — the
 # printed leaflet's QR code points to pavelsramek.com/follow (no .html),
 # same reasoning as /transparence above.
@@ -33,22 +23,76 @@
 # pro staré odkazy/záložky/indexaci na nejbližší náhradu.
 [[redirects]]
   from = "/galerie"
-  to = "/co-se-povedlo.html"
+  to = "/"
   status = 301
 
 [[redirects]]
   from = "/galerie.html"
-  to = "/co-se-povedlo.html"
+  to = "/"
   status = 301
 
 # /aktuality byla zrušena (obsah je teď identický s co-se-povedlo.html)
 # — přesměrování pro staré odkazy/záložky/indexaci.
 [[redirects]]
   from = "/aktuality"
-  to = "/co-se-povedlo.html"
+  to = "/"
   status = 301
 
 [[redirects]]
   from = "/aktuality.html"
-  to = "/co-se-povedlo.html"
+  to = "/"
+  status = 301
+
+# Po volbách 2026 (11. 10. 2026) byl web zjednodušen na děkovnou stránku.
+# Zrušené stránky přesměrovány na úvod, aby staré odkazy, záložky
+# a QR kódy z letáku (vč. /transparence) nevedly na 404.
+
+[[redirects]]
+  from = "/program"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/program.html"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/co-se-povedlo"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/co-se-povedlo.html"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/investice"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/investice.html"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/tym"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/tym.html"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/transparence"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/transparence.html"
+  to = "/"
   status = 301
